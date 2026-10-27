@@ -1,0 +1,819 @@
+@font-face {
+  font-family: "Proza Libre";
+  src: url("assets/fonts/proza-libre-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Proza Libre";
+  src: url("assets/fonts/proza-libre-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Proza Libre";
+  src: url("assets/fonts/proza-libre-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Proza Libre";
+  src: url("assets/fonts/proza-libre-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* manhã num resort, no registro da Rolex com a paleta do Clube: o branco é o chão, o creme da marca aquece as seções
+   alternadas, o verde é tinta e ação; o verde profundo da marca vira faixa de joia em poucos momentos; ouro em fio */
+:root {
+  --branco: #ffffff;
+  /* creme da marca (#efe1c9) clareado: o chão quente das seções alternadas */
+  --marfim: #f8f4ec;
+  --nevoa: #f3f5f2;
+  --tinta: #071613;
+  --verde: #1c3a37;
+  --verde-apoio: #2c4a46;
+  /* verde de ação: o petróleo da marca puxado para o verde Rolex */
+  --esmeralda: #1a5a46;
+  /* faixa de joia: o verde profundo da marca, com luz no alto */
+  --floresta: #0c2420;
+  --creme: #efe1c9;
+  --ouro: #b48a45;
+  --ouro-claro: #d4b073;
+  /* ouro escurecido para letra pequena: lê sobre o branco e o marfim */
+  --ouro-texto: #86672f;
+  --linha: rgba(28, 58, 55, 0.22);
+  --margem: 20px;
+  --topo: 64px;
+  --ease-revela: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-estado: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-toque: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  :root {
+    --margem: clamp(32px, 4.4vw, 72px);
+    --topo: 84px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  background: var(--branco);
+  color: var(--tinta);
+  scrollbar-color: var(--verde) var(--nevoa);
+}
+
+body {
+  margin: 0;
+  font-family: "Proza Libre", Optima, Candara, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  background: var(--branco);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(185, 142, 74, 0.32);
+  color: var(--tinta);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 4px;
+}
+
+.pular {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 30;
+  padding: 10px 14px;
+  background: var(--verde);
+  color: var(--branco);
+}
+
+.pular:focus {
+  left: var(--margem);
+}
+
+/* ------------------------------------------------------------ cabeçalho
+   fora do hero: lá o símbolo já fica ao lado do título; o topo desce quando o hero sai da tela (secoes.js) */
+.topo {
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--topo);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--margem);
+  padding-top: env(safe-area-inset-top);
+  transform: translateY(-100%);
+  visibility: hidden;
+}
+
+.marca {
+  display: block;
+  width: 168px;
+  /* a logo desenhada tem 26px de altura (656.8 / 103.6); a caixa tem 44px para o toque e a máscara centraliza o desenho */
+  height: 44px;
+  background: var(--verde);
+  -webkit-mask: url("assets/brand/logo-horizontal.svg") no-repeat center / contain;
+  mask: url("assets/brand/logo-horizontal.svg") no-repeat center / contain;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .marca {
+    width: 216px;
+  }
+}
+
+/* ------------------------------------------------------------ hero
+   celular: a imagem em cima, cortada embaixo pelo painel branco do botão
+   desktop: a imagem de ponta a ponta, texto à esquerda, o trio na base à direita */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100svh;
+  min-height: 620px;
+  overflow: clip;
+  background: var(--branco);
+}
+
+.hero__cena {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--nevoa);
+  /* escala do trio: px de tela por px do grupo; um rosto, do cabelo ao queixo, tem 350 px do grupo */
+  --g: calc(min(28.6vw, 15.4svh) / 350);
+  /* quanto do trio passa da borda direita, em px do grupo */
+  --sobra: 150;
+}
+
+.hero__plano,
+.hero__foco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: 50% 40%;
+}
+
+.hero__plano {
+  transition: filter 1.4s var(--ease-estado), transform 1.4s var(--ease-estado);
+}
+
+/* sem WebGL, o desfoque de fundo é um desfoque simples da foto */
+.hero__plano.desfocado {
+  filter: blur(6px);
+  transform: scale(1.03);
+}
+
+.hero__foco {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-estado);
+}
+
+.hero__foco.pronto {
+  opacity: 1;
+}
+
+/* um grão só, por cima da foto e do trio: os dois viram o mesmo plano filmado */
+.hero__cena::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+}
+
+/* com WebGL o grão sai do mesmo desenho da foto e do trio */
+.hero__cena.gl::after {
+  display: none;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .hero {
+    display: block;
+  }
+  .hero__cena {
+    position: absolute;
+    inset: 0;
+    --g: calc(min(23svh, 14.6vw) / 350);
+    --sobra: 130;
+  }
+}
+
+/* ------------------------------------------------------------ o trio: os três cortados no peito pela borda de baixo
+   a janela do trio vai do ombro do Pablo ao ombro do Nezio e do alto das cabeças ao corte do peito (1496 x 740 px do
+   grupo); cada foto passa da borda de baixo e a cena corta */
+.trio {
+  position: absolute;
+  z-index: 3;
+  right: calc(var(--sobra) * var(--g) * -1);
+  bottom: 0;
+  width: calc(1496 * var(--g));
+  height: calc(740 * var(--g));
+  pointer-events: none;
+}
+
+.pessoa {
+  position: absolute;
+  margin: 0;
+  left: calc(var(--x) * var(--g));
+  top: calc(var(--y) * var(--g));
+  width: calc(var(--w) * var(--g));
+  height: calc(var(--h) * var(--g));
+}
+
+.pessoa img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pessoa--pablo {
+  z-index: 1;
+}
+
+.pessoa--nezio {
+  z-index: 2;
+}
+
+.pessoa--enio {
+  z-index: 3;
+}
+
+/* com WebGL o trio é desenhado no mesmo plano da foto (mesma lente, mesma luz); as fotos ficam para o toque e o leitor de tela */
+.trio.no-plano .pessoa {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------ caixa de foco, como no visor de uma câmera */
+.foco {
+  position: absolute;
+  z-index: 7;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-estado);
+  /* distância do rótulo ao alto da caixa (hero.js lê para saber se o rótulo cabe abaixo do título) */
+  --folga: 10px;
+}
+
+.foco.visivel {
+  opacity: 1;
+}
+
+.foco__caixa {
+  position: absolute;
+  inset: 0;
+  --c: rgba(255, 255, 255, 0.96);
+  --t: 1.5px;
+  --l: clamp(9px, 22%, 18px);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / var(--t) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--t) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--t) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--t) var(--l) no-repeat;
+  filter: drop-shadow(0 0 1px rgba(7, 22, 19, 0.6)) drop-shadow(0 0 6px rgba(7, 22, 19, 0.18));
+}
+
+/* o rótulo fica acima do rosto, no céu: nunca em cima do peito de ninguém */
+.foco__rotulo {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + var(--folga));
+  margin: 0;
+  display: grid;
+  gap: 1px;
+  width: max-content;
+  max-width: min(230px, calc(100vw - 20px));
+  padding: 7px 11px 8px;
+  background: var(--verde);
+  color: var(--branco);
+  border-radius: 2px;
+  box-shadow: 0 10px 24px -14px rgba(7, 22, 19, 0.7);
+}
+
+.foco__rotulo {
+  transition: opacity 0.25s var(--ease-estado);
+}
+
+.foco.andando .foco__rotulo,
+.foco.sem-rotulo .foco__rotulo {
+  opacity: 0;
+}
+
+.foco__nome {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+}
+
+.foco__fato {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.86);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.foco__parte {
+  display: block;
+  white-space: nowrap;
+}
+
+.foco__sep {
+  display: none;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .foco__parte {
+    display: inline;
+  }
+  .foco__sep {
+    display: inline;
+    white-space: pre;
+  }
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .foco__rotulo {
+    max-width: none;
+    white-space: nowrap;
+  }
+}
+
+/* celular: as cabeças ficam mais perto umas das outras; o rótulo sobe para não encostar na cabeça vizinha */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .foco {
+    --folga: 40px;
+  }
+}
+
+/* sem WebGL (ou parado), o clique no resort tira o desfoque da foto e desfoca os três */
+.hero.no-resort .hero__plano.desfocado {
+  filter: none;
+  transform: none;
+}
+
+.hero.no-resort .trio:not(.no-plano) .pessoa {
+  filter: blur(7px) !important;
+  transition: filter 0.8s var(--ease-estado);
+}
+
+/* a dica do clique: uma pílula de vidro que segue o cursor sobre a paisagem */
+.hero__dica {
+  position: absolute;
+  z-index: 9;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 7px 13px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--tinta);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(176, 138, 71, 0.45), 0 10px 26px -14px rgba(7, 22, 19, 0.55);
+  opacity: 0;
+  scale: 0.94;
+  transition: opacity 0.25s var(--ease-toque), scale 0.25s var(--ease-toque);
+}
+
+.hero__dica.visivel {
+  opacity: 1;
+  scale: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero.aberto .hero__cena {
+    cursor: pointer;
+  }
+}
+
+/* ------------------------------------------------------------ texto */
+/* a logo do Clube com o título: o em vem do tamanho do título.
+   O topo não aparece no hero: a logo e o título sobem para o canto, no lugar dele */
+.hero__cabeca {
+  position: absolute;
+  z-index: 8;
+  left: var(--margem);
+  right: var(--margem);
+  top: calc(env(safe-area-inset-top) + max(24px, 4svh));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6em;
+  font-size: clamp(1.375rem, 6.4vw, 2rem);
+}
+
+/* celular: a logo horizontal em cima do título (ao lado, na altura de duas linhas, o nome ficaria ilegível) */
+.hero__marca {
+  flex: none;
+  width: min(240px, 62vw);
+  aspect-ratio: 656.8 / 103.6;
+  background: var(--verde);
+  -webkit-mask: url("assets/brand/logo-horizontal.svg") no-repeat center / contain;
+  mask: url("assets/brand/logo-horizontal.svg") no-repeat center / contain;
+}
+
+.hero__titulo {
+  margin: 0;
+  font-weight: 500;
+  font-size: 1em;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+  text-wrap: balance;
+}
+
+/* a quebra do título só vale no desktop, onde a frase cabe em duas linhas */
+.quebra {
+  display: none;
+}
+
+/* palavras mascaradas para a abertura (o script só embrulha quando há movimento) */
+.palavra {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.palavra > span {
+  display: inline-block;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .quebra {
+    display: inline;
+  }
+  /* o título ocupa o céu: margem de cima perto da da esquerda, e o maior corpo que ainda cabe em 3 linhas */
+  .hero__cabeca {
+    right: auto;
+    max-width: calc(100% - 2 * var(--margem));
+    top: clamp(40px, 8svh, 88px);
+    flex-direction: row;
+    gap: 0.5em;
+    font-size: clamp(2.25rem, min(4.15vw, 7svh), 4.75rem);
+  }
+  /* a logo vertical ao lado, da altura das maiúsculas da 1ª linha à linha de base da 3ª */
+  .hero__marca {
+    width: calc(2.8em * 365 / 325.9);
+    aspect-ratio: 365 / 325.9;
+    margin-top: 0.16em;
+    -webkit-mask-image: url("assets/brand/logo-vertical.svg");
+    mask-image: url("assets/brand/logo-vertical.svg");
+  }
+  .hero__titulo {
+    max-width: 20em;
+    line-height: 1.04;
+    letter-spacing: -0.034em;
+  }
+}
+
+.hero__base {
+  position: relative;
+  z-index: 8;
+  display: grid;
+  gap: 14px;
+  padding: 18px var(--margem) calc(16px + env(safe-area-inset-bottom));
+  background: var(--branco);
+}
+
+/* celular: o trio não termina num corte reto contra o painel branco; a névoa clareia até o branco */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .hero__base::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 104px;
+    pointer-events: none;
+    background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55) 55%, var(--branco));
+  }
+}
+
+.hero__apoio {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--verde);
+  text-wrap: pretty;
+}
+
+.hero__acoes {
+  display: grid;
+  gap: 12px;
+}
+
+.botao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 58px;
+  padding: 0 8px 0 24px;
+  border-radius: 999px;
+  background: var(--esmeralda);
+  color: var(--branco);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  line-height: 1.2;
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgba(185, 142, 74, 0.38), 0 16px 32px -20px rgba(7, 22, 19, 0.75);
+  transition: background-color 0.25s var(--ease-toque), transform 0.2s var(--ease-toque);
+}
+
+.botao__seta {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--ouro);
+  color: var(--tinta);
+  transition: transform 0.3s var(--ease-toque);
+}
+
+.botao:active {
+  transform: scale(0.985);
+}
+
+.botao:focus-visible {
+  outline-color: var(--verde);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .botao:hover {
+    background: var(--tinta);
+  }
+  .botao:hover .botao__seta {
+    transform: translateX(3px);
+  }
+}
+
+.link {
+  justify-self: start;
+  color: var(--verde);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(185, 142, 74, 0.8);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+.link:hover {
+  text-decoration-color: var(--verde);
+}
+
+.hero__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 2px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--linha);
+}
+
+.hero__quando {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--verde);
+  font-feature-settings: "tnum" 1;
+}
+
+.hero__aviso {
+  font-size: 0.75rem;
+  color: var(--verde-apoio);
+}
+
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .hero__base {
+    position: absolute;
+    left: var(--margem);
+    bottom: 40px;
+    width: min(520px, 38vw);
+    padding: 0;
+    gap: 22px;
+    background: none;
+  }
+  .hero__apoio {
+    font-size: 1.1875rem;
+  }
+  /* luz da água atrás do texto: clareia a margem do lago e o resort desfocado sem desenhar uma caixa */
+  .hero__base::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    /* elipse larga e baixa com o centro na margem esquerda, onde ficam as árvores escuras: cobre o começo de cada
+       linha da lede (contraste >= 4,5:1) sem subir como coluna sobre a ala do hotel */
+    left: -70%;
+    right: -46%;
+    top: -30%;
+    bottom: -34%;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(246, 248, 245, 0.94), rgba(246, 248, 245, 0.84) 62%, rgba(246, 248, 245, 0));
+  }
+  .hero__acoes {
+    justify-items: start;
+    gap: 16px;
+  }
+  .botao {
+    min-width: 300px;
+  }
+}
+
+/* ------------------------------------------------------------ abertura: entra só com script e movimento */
+.js .palavra > span {
+  transform: translateY(108%);
+  transition: transform 1.05s var(--ease-revela);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+
+.js .hero.aberto .palavra > span {
+  transform: none;
+}
+
+.js .hero__marca {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 1.05s var(--ease-revela), transform 1.05s var(--ease-revela);
+}
+
+.js .hero.aberto .hero__marca {
+  opacity: 1;
+  transform: none;
+}
+
+.js .hero__base > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.9s var(--ease-revela), transform 0.9s var(--ease-revela);
+}
+
+.js .hero.aberto .hero__base > * {
+  opacity: 1;
+  transform: none;
+}
+
+.js .hero.aberto .hero__base > :nth-child(1) {
+  transition-delay: 0.4s;
+}
+
+.js .hero.aberto .hero__base > :nth-child(2) {
+  transition-delay: 0.52s;
+}
+
+.js .hero.aberto .hero__base > :nth-child(3) {
+  transition-delay: 0.64s;
+}
+
+.js .trio {
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-estado);
+}
+
+.js .hero.aberto .trio {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .palavra > span,
+  .js .hero__marca,
+  .js .hero__base > *,
+  .js .trio {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+  .hero__plano,
+  .hero__foco,
+  .foco {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------ a cortina de abertura (hero.js monta e tira)
+   névoa da manhã cobrindo o hero; a logo no centro com o fio de ouro e a data. O véu sobe recortado de baixo
+   para cima e a logo voa até o lugar dela ao lado do título */
+.abertura {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.abertura__veu {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0% 0% 0% 0%);
+  background:
+    radial-gradient(70% 55% at 50% 42%, #ffffff, rgba(255, 255, 255, 0) 70%),
+    var(--nevoa);
+}
+
+.abertura__marca {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--verde);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  will-change: transform;
+}
+
+.abertura__fio {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(240px, 50vw);
+  height: 1px;
+  margin-left: max(-120px, -25vw);
+  background: linear-gradient(90deg, rgba(180, 138, 69, 0), var(--ouro) 20% 80%, rgba(180, 138, 69, 0));
+}
+
+.abertura__data {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: 0;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ouro-texto);
+}
+
+/* a névoa já cobre o hero no primeiro quadro, antes do script montar a cortina: o título não pisca.
+   Se o script não rodar, ela some sozinha em 3,5 s */
+@media (prefers-reduced-motion: no-preference) {
+  .js .hero:not(.sem-veu)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 29;
+    background: var(--nevoa);
+    pointer-events: none;
+    animation: veu-seguranca 0.5s linear 3.5s forwards;
+  }
+}
+
+@keyframes veu-seguranca {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

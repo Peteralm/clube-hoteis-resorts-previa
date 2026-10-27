@@ -1,0 +1,3282 @@
+/* Seções abaixo do hero: o mesmo mundo da manhã no resort.
+   Branco e névoa como chão, verde só como tinta e ação, ouro em fio, cota e detalhe.
+   Desenhos no registro de planta de arquiteto: fio fino, cota com marcas nas pontas, números em mono. */
+
+.secao {
+  position: relative;
+  padding: clamp(88px, 11vw, 168px) var(--margem);
+  background: var(--branco);
+}
+
+.secao--nevoa {
+  background: var(--marfim);
+}
+
+/* faixa de joia: o verde profundo do Clube como chão, letra creme e branca, ouro claro em fio */
+.secao--joia {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(58, 104, 90, 0.55), rgba(58, 104, 90, 0) 70%),
+    linear-gradient(#123630, var(--floresta));
+  /* cor sólida por baixo: o texto creme continua legível se o gradiente não pintar */
+  background-color: var(--floresta);
+  color: var(--creme);
+}
+
+.miolo {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.titulo {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(2.125rem, 4.6vw, 4.375rem);
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 22px 0 0;
+  max-width: 38ch;
+  font-size: clamp(1.0625rem, 1.3vw, 1.3125rem);
+  line-height: 1.55;
+  color: var(--verde);
+  text-wrap: pretty;
+}
+
+
+/* selo: o rótulo curto, em mono, que diz do que a seção trata antes do título */
+.selo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 22px;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ouro-texto);
+}
+
+.selo::before {
+  content: "";
+  width: 36px;
+  height: 1px;
+  background: var(--ouro);
+}
+
+/* ============================================================ o que o Clube faz
+   bento: a célula do Dia 1 (aprender) domina, negociar fica em pé ao lado, a faixa verde dos ingressos e o resort do
+   Dia 2 correm embaixo com a divisa deslocada. Foto escura com véu embaixo, letra branca; o tamanho do verbo segue a
+   largura da própria célula (cqi), então a hierarquia vem do tamanho da célula */
+.oque__cabeca {
+  display: grid;
+  gap: 22px;
+  margin-bottom: clamp(40px, 5vw, 72px);
+}
+
+.oque__cabeca .selo {
+  margin: 0;
+}
+
+.oque__cabeca .titulo {
+  max-width: 13em;
+}
+
+.oque__cabeca .lede {
+  margin: 0;
+  max-width: 44ch;
+}
+
+.oque__grade {
+  display: grid;
+  gap: clamp(10px, 1.1vw, 16px);
+}
+
+.oque__celula {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 4 / 5;
+  color: var(--branco);
+  background: var(--tinta);
+}
+
+/* véu de baixo: a letra branca lê sobre qualquer trecho da foto */
+.oque__celula::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to top, rgba(7, 22, 19, 0.92) 0%, rgba(7, 22, 19, 0.62) 40%, rgba(7, 22, 19, 0) 74%);
+  pointer-events: none;
+}
+
+.oque__foto {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  transition: transform 0.9s var(--ease-revela);
+}
+
+.oque__foto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.oque__celula--aprender .oque__foto img {
+  object-position: 62% 70%;
+}
+
+/* as mesas da edição anterior: o quadro em pé fica nas mesas da frente, onde estão os rostos */
+.oque__celula--negociar .oque__foto img {
+  object-position: 28% 72%;
+}
+
+.oque__fonte {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  margin: 0;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  color: var(--verde);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.oque__corpo {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: clamp(20px, 6cqi, 40px);
+}
+
+.oque__quando {
+  margin: 0;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--creme);
+}
+
+.oque__quando span {
+  color: var(--ouro-claro);
+}
+
+.oque__quando span::after {
+  content: " · ";
+}
+
+.oque__verbo {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(2.375rem, 13cqi, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--branco);
+}
+
+/* a célula do resort é larga e baixa: o verbo cresce menos com a largura */
+.oque__celula--resort .oque__verbo {
+  font-size: clamp(2.375rem, 9cqi, 5.5rem);
+}
+
+.oque__texto {
+  margin: 0;
+  max-width: 34ch;
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+  text-wrap: pretty;
+}
+
+/* a célula inteira é o link (o ::after do link cobre a célula); o texto do link diz para onde vai */
+.oque__ir {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 4px;
+  font-size: 0.9375rem;
+  color: var(--branco);
+  text-decoration: none;
+  background: linear-gradient(var(--ouro-claro), var(--ouro-claro)) left calc(100% - 10px) / 100% 1px no-repeat;
+}
+
+.oque__ir::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.oque__ir:focus-visible {
+  outline: none;
+}
+
+.oque__celula:has(.oque__ir:focus-visible) {
+  outline: 2px solid var(--ouro);
+  outline-offset: 3px;
+}
+
+.oque__ir svg {
+  transition: transform 0.25s var(--ease-toque);
+}
+
+.oque__celula:active {
+  transform: scale(0.99);
+  transition: transform 0.16s var(--ease-toque);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .oque__celula:hover .oque__foto {
+    transform: scale(1.04);
+  }
+
+  .oque__celula:hover .oque__ir svg {
+    transform: translateY(3px);
+  }
+}
+
+/* a faixa verde: o que cada ingresso cobre, na língua dos dias */
+.oque__celula--ingressos {
+  aspect-ratio: auto;
+  justify-content: space-between;
+  gap: 28px;
+  padding: clamp(24px, 7cqi, 40px);
+  color: var(--creme);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(58, 104, 90, 0.6), rgba(58, 104, 90, 0) 70%),
+    linear-gradient(#123630, var(--floresta));
+  background-color: var(--floresta);
+}
+
+.oque__celula--ingressos::before {
+  display: none;
+}
+
+.oque__celula--ingressos .oque__ir {
+  align-self: flex-start;
+}
+
+.oque__planos {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(1.625rem, 11cqi, 2.375rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--branco);
+  text-wrap: balance;
+}
+
+.oque__planos span {
+  display: block;
+}
+
+.oque__planos em {
+  font-style: normal;
+  color: var(--ouro-claro);
+}
+
+@media (min-width: 900px) {
+  .oque__cabeca {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: clamp(32px, 4vw, 72px);
+    align-items: end;
+  }
+
+  .oque__cabeca .selo {
+    grid-column: 1 / -1;
+  }
+
+  .oque__grade {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    /* altura mínima por linha; o texto pode esticar a linha, nunca vazar da célula */
+    grid-template-rows: repeat(2, minmax(clamp(200px, 19vw, 290px), auto)) minmax(clamp(300px, 26vw, 400px), auto);
+  }
+
+  .oque__celula {
+    aspect-ratio: auto;
+  }
+
+  .oque__celula--aprender {
+    grid-column: 1 / 9;
+    grid-row: 1 / 3;
+  }
+
+  .oque__celula--negociar {
+    grid-column: 9 / 13;
+    grid-row: 1 / 3;
+  }
+
+  .oque__celula--ingressos {
+    grid-column: 1 / 5;
+    grid-row: 3;
+  }
+
+  .oque__celula--resort {
+    grid-column: 5 / 13;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 899px) {
+  .oque__celula--aprender,
+  .oque__celula--resort {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* o fio do selo se desenha quando o selo aparece (secoes.js tira a espera) */
+.selo::before {
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease-revela);
+}
+
+.selo--espera::before {
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oque__foto,
+  .oque__ir svg,
+  .oque__celula:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* cabeçalho: fica fora do hero e desce sólido quando o hero sai da tela */
+.topo {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 1px 0 var(--linha);
+  -webkit-backdrop-filter: saturate(1.2) blur(10px);
+  backdrop-filter: saturate(1.2) blur(10px);
+  transition: transform 0.4s var(--ease-estado), visibility 0s linear 0.4s;
+}
+
+.topo--solido {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.5s var(--ease-revela), visibility 0s;
+}
+
+/* ============================================================ a mesa
+   a sala à meia-luz, e cada lugar clareia devagar a partir da cadeira com a rolagem; o objeto diante de cada pessoa diz
+   quem ela é e o rótulo aparece no próprio lugar. A frase de apoio troca de lugar com a confirmação quando a mesa completa */
+.mesa {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.mesa__palco {
+  display: grid;
+  gap: 24px;
+  align-content: center;
+  justify-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(88px, 11vw, 140px) 0;
+}
+
+.mesa--viva {
+  height: 300svh;
+}
+
+.mesa--viva .mesa__palco {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding: calc(var(--topo) + 14px) 0 22px;
+}
+
+.mesa__cabeca {
+  display: grid;
+  grid-template-areas: "selo" "titulo" "frase" "passos";
+  justify-items: start;
+  width: 100%;
+}
+
+.mesa__cabeca .titulo {
+  grid-area: titulo;
+  max-width: 12em;
+}
+
+.mesa__selo {
+  grid-area: selo;
+  margin-bottom: 14px;
+}
+
+.mesa__lede,
+.mesa__virada {
+  grid-area: frase;
+  align-self: start;
+}
+
+.mesa__lede {
+  margin-top: 14px;
+  opacity: calc(1 - var(--fim, 0));
+  transform: translateY(calc(var(--fim, 0) * -10px));
+}
+
+/* a confirmação ocupa o lugar da frase de apoio quando os cinco já sentaram */
+.mesa__virada {
+  margin: 14px 0 0;
+  max-width: 30ch;
+  font-weight: 500;
+  font-size: clamp(1.0625rem, 1.5vw, 1.4375rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--tinta);
+  opacity: var(--fim, 1);
+  transform: translateY(calc((1 - var(--fim, 1)) * 12px));
+}
+
+.mesa__virada em {
+  font-style: normal;
+  background: linear-gradient(var(--ouro), var(--ouro)) left bottom / calc(var(--fim, 1) * 100%) 2px no-repeat;
+  padding-bottom: 2px;
+}
+
+.mesa__passos {
+  grid-area: passos;
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.mesa__passos li {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--ouro);
+  transition: background-color 0.35s var(--ease-estado), border-color 0.35s var(--ease-estado);
+}
+
+.mesa__passos li.feito {
+  background: var(--esmeralda);
+  border-color: var(--esmeralda);
+}
+
+.mesa__planta {
+  position: relative;
+  margin: 0;
+  width: min(100%, 640px);
+  aspect-ratio: 1;
+  background: #f1f0ec;
+}
+
+.mesa--viva .mesa__planta {
+  width: min(100%, calc(100svh - var(--topo) - 250px));
+}
+
+.mesa__planta img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* cada lugar clareia a partir da cadeira: a máscara abre em círculo de borda larga com centro no assento (--abre de 0
+   a 1, secoes.js). As camadas são fatias da mesma foto, então o que se vê é a luz chegando àquele lugar */
+.mesa__pessoa[data-lugar="0"] { --sx: 50%; --sy: 19.5%; }
+.mesa__pessoa[data-lugar="1"] { --sx: 78.5%; --sy: 40.2%; }
+.mesa__pessoa[data-lugar="2"] { --sx: 67.6%; --sy: 73.8%; }
+.mesa__pessoa[data-lugar="3"] { --sx: 32.4%; --sy: 73.8%; }
+.mesa__pessoa[data-lugar="4"] { --sx: 21.5%; --sy: 40.2%; }
+
+.mesa--viva .mesa__pessoa {
+  --raio: calc(var(--abre, 0) * 115%);
+  -webkit-mask-image: radial-gradient(circle at var(--sx) var(--sy), #000 calc(var(--raio) - 35%), transparent var(--raio));
+  mask-image: radial-gradient(circle at var(--sx) var(--sy), #000 calc(var(--raio) - 35%), transparent var(--raio));
+}
+
+/* meia-luz leve: fica por baixo das pessoas, então só escurece os lugares ainda vazios; sai quando a mesa completa */
+.mesa__veu {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 22, 19, 0.14);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mesa--viva .mesa__veu {
+  opacity: calc(1 - var(--fim, 0));
+}
+
+.mesa__rotulos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rotulo-lugar {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(var(--ax), var(--ay));
+  pointer-events: none;
+}
+
+.rotulo-lugar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 1px rgba(180, 138, 69, 0.55), 0 8px 20px -12px rgba(7, 22, 19, 0.5);
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--tinta);
+}
+
+.rotulo-lugar span::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ouro);
+}
+
+.mesa--viva .rotulo-lugar span {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transition: opacity 0.45s var(--ease-revela), transform 0.6s var(--ease-revela);
+}
+
+.mesa--viva .rotulo-lugar.visivel span {
+  opacity: 1;
+  transform: none;
+}
+
+/* celular: os rótulos dos lados descem para baixo de quem está sentado, sem cobrir o ombro de quem está no alto */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .rotulo-lugar[data-lugar="1"],
+  .rotulo-lugar[data-lugar="4"] {
+    --y: 58% !important;
+    --ay: 0% !important;
+  }
+}
+
+.mesa__legenda-planta {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  font-size: 0.75rem;
+  color: var(--verde-apoio);
+}
+
+.apenas-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .mesa__palco {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    column-gap: clamp(40px, 5vw, 96px);
+    align-items: center;
+    justify-items: start;
+  }
+  .mesa__cabeca .titulo {
+    max-width: 12em;
+    font-size: clamp(2rem, 3.2vw, 3.25rem);
+  }
+  .mesa__lede,
+  .mesa__virada {
+    margin-top: 26px;
+  }
+  .mesa__passos {
+    margin-top: 30px;
+  }
+  .mesa__planta,
+  .mesa--viva .mesa__planta {
+    width: min(100%, calc(100svh - var(--topo) - 64px), 760px);
+    justify-self: end;
+  }
+  .rotulo-lugar span {
+    gap: 9px;
+    padding: 7px 13px 8px;
+    font-size: 0.9375rem;
+  }
+}
+
+/* ============================================================ manifesto */
+.manifesto {
+  text-align: center;
+  padding-top: clamp(72px, 9vw, 140px);
+}
+
+.manifesto__antes {
+  margin: 0 auto;
+  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+  color: rgba(239, 225, 201, 0.78);
+}
+
+.manifesto__nao {
+  list-style: none;
+  margin: 36px auto 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.manifesto__nao li {
+  font-size: clamp(1.75rem, 3.6vw, 3.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: rgba(239, 225, 201, 0.7);
+}
+
+.risco {
+  position: relative;
+  display: inline-block;
+}
+
+.risco::after {
+  content: "";
+  position: absolute;
+  left: -0.08em;
+  right: -0.08em;
+  top: 54%;
+  height: 0.06em;
+  min-height: 2px;
+  background: var(--ouro-claro);
+  transform: scaleX(var(--risco, 1));
+  transform-origin: left center;
+}
+
+/* o único momento de escala extrema da página: a frase ocupa a largura inteira, de margem a margem */
+.manifesto__frase {
+  margin: 40px auto 0;
+  font-weight: 500;
+  font-size: clamp(2.75rem, 10.4vw, 9.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  color: var(--branco);
+}
+
+.manifesto__frase em {
+  color: var(--ouro-claro);
+}
+
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .manifesto__frase {
+    white-space: normal;
+    font-size: clamp(3.25rem, 16vw, 5rem);
+  }
+}
+
+.manifesto__apoio {
+  margin: 32px auto 0;
+  max-width: 44ch;
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  line-height: 1.55;
+  color: rgba(239, 225, 201, 0.86);
+  text-wrap: pretty;
+}
+
+/* ============================================================ quem conduz a mesa */
+.mentores__titulo {
+  margin-bottom: clamp(40px, 6vw, 88px);
+}
+
+.retrato {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  /* o vale do hero, desfocado e desbotado (tools/resort/fundo_retrato.py): os três moram no mesmo lugar */
+  background: var(--nevoa) url("assets/trio/fundo-retrato.webp") center / cover no-repeat;
+}
+
+.retrato img {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: auto;
+  display: block;
+  transform: translateX(-50%);
+}
+
+.retrato--enio {
+  aspect-ratio: 4 / 5;
+}
+
+/* Ênio do alto da cabeça ao meio do peito, com o gesto: o resto do blazer guarda sombras de palco */
+.retrato--enio img {
+  /* no card, perto dos retratos firmes de Nezio e Pablo, o Ênio ganha o contraste que perde no grupo do hero */
+  filter: contrast(1.08) saturate(1.04);
+  width: 143.7%;
+  left: -36.4%;
+  top: 4.9%;
+  bottom: auto;
+  transform: none;
+}
+
+/* Nezio e Pablo no mesmo enquadramento fechado: a cabeça ocupa ~80% da altura do quadro, rosto no centro.
+   (o Pablo vem da foto do cliente com o lado escondido completado por IA: colarinho e ombros aparecem) */
+.retrato--nezio,
+.retrato--pablo {
+  aspect-ratio: 5 / 4;
+}
+
+.retrato--nezio img,
+.retrato--pablo img {
+  transform: none;
+  bottom: auto;
+}
+
+.retrato--nezio img {
+  width: 154.3%;
+  left: -25.1%;
+  top: 9.5%;
+}
+
+.retrato--pablo img {
+  /* cabeça da mesma altura da do Nezio; o queixo a ~74% do quadro, com colarinho e os dois ombros (completados) */
+  width: 133%;
+  left: -16.9%;
+  top: 2%;
+}
+
+.enio {
+  display: grid;
+  gap: 36px;
+}
+
+
+.nome {
+  margin: 8px 0 0;
+  font-weight: 500;
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--tinta);
+}
+
+.bio {
+  margin: 14px 0 0;
+  max-width: 40ch;
+  font-size: clamp(1.0625rem, 1.2vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--verde);
+}
+
+.metrica {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
+}
+
+.metrica__valor {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.metrica__rotulo {
+  margin: 12px 0 0;
+  color: var(--verde-apoio);
+}
+
+.unidades {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+}
+
+.regua {
+  margin-top: 16px;
+}
+
+.regua svg {
+  display: block;
+  width: 100%;
+  height: 30px;
+  overflow: visible;
+}
+
+.regua path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.regua__base {
+  stroke: var(--linha);
+  stroke-width: 1;
+}
+
+.regua__ano {
+  stroke: var(--verde);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: bottom;
+  transition: transform 0.5s var(--ease-revela);
+  transition-delay: calc(var(--i) * 45ms);
+}
+
+.regua__ano--cinco {
+  stroke: var(--ouro);
+  stroke-width: 1.5;
+}
+
+.regua--espera .regua__ano {
+  transform: scaleY(0);
+}
+
+.premio {
+  display: grid;
+  gap: 4px;
+  margin: 40px 0 0;
+  padding: 18px 22px;
+  border: 1px solid var(--ouro);
+  box-shadow: inset 0 0 0 4px var(--nevoa), inset 0 0 0 5px rgba(185, 142, 74, 0.45);
+}
+
+.premio__nome {
+  font-weight: 500;
+  font-size: 1.125rem;
+  color: var(--tinta);
+}
+
+.premio__de {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ouro-texto);
+}
+
+.mentores__par {
+  display: grid;
+  gap: 56px;
+  margin-top: clamp(72px, 9vw, 136px);
+}
+
+.mentor .retrato {
+  margin-bottom: 24px;
+}
+
+.fatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 40px;
+  margin: 24px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha);
+}
+
+.fatos div {
+  display: grid;
+  gap: 4px;
+}
+
+.fatos dt {
+  font-weight: 500;
+  font-size: 1.75rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.fatos dd {
+  margin: 0;
+  color: var(--verde-apoio);
+}
+
+.convidados {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 28px;
+  align-items: start;
+  margin-top: clamp(72px, 9vw, 136px);
+  padding-top: 28px;
+  border-top: 1px solid var(--ouro);
+}
+
+.convidados__num {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(3.5rem, 7vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--verde);
+}
+
+.convidados__titulo {
+  margin: 4px 0 8px;
+  font-weight: 500;
+  font-size: clamp(1.25rem, 1.8vw, 1.625rem);
+  color: var(--tinta);
+}
+
+.convidados p {
+  margin: 0;
+  max-width: 52ch;
+  line-height: 1.55;
+  color: var(--verde);
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .enio {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(48px, 6vw, 112px);
+    align-items: start;
+  }
+  .retrato--enio {
+    position: sticky;
+    top: calc(var(--topo) + 32px);
+  }
+  .mentores__par {
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(40px, 5vw, 88px);
+  }
+}
+
+/* ============================================================ a obra: do papel à primeira noite
+   a imagem em cima, de ponta a ponta; embaixo, numa faixa branca, a frase da fase e a régua das datas da câmera.
+   O texto nunca fica sobre a foto: o desenho é branco, a noite é escura, e a faixa lê igual nos dois */
+.obra {
+  position: relative;
+  background: var(--branco);
+}
+
+.obra__palco {
+  display: grid;
+  grid-template-rows: auto auto;
+}
+
+.obra__quadro {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #ebe8e1;
+}
+
+.obra__poster,
+.obra__tela {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: 60% 50%;
+}
+
+.obra__credito {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 10px;
+  margin: 0;
+  max-width: calc(100% - 20px);
+  padding: 4px 9px 5px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--verde);
+}
+
+.obra__faixa {
+  display: grid;
+  gap: 14px;
+  padding: 22px var(--margem) 24px;
+}
+
+.obra__frases {
+  display: grid;
+}
+
+.obra__frase {
+  grid-area: 1 / 1;
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(1.75rem, 3.4vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+  text-wrap: balance;
+}
+
+.obra__frase em {
+  color: var(--ouro-texto);
+}
+
+/* sem movimento a seção mostra o fim: a noite acesa e a frase dela */
+.obra__frase:not([data-fase="noite"]) {
+  visibility: hidden;
+}
+
+.obra__apoio {
+  margin: 0;
+  max-width: 44ch;
+  color: var(--verde);
+  text-wrap: pretty;
+}
+
+.obra__regua {
+  display: grid;
+  gap: 10px;
+  align-self: end;
+}
+
+/* celular: a frase, a régua e o apoio em corpo menor, para a foto ficar com o máximo da tela */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .obra__faixa {
+    gap: 12px;
+    padding-top: 18px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+  .obra__regua {
+    order: 2;
+  }
+  .obra__apoio {
+    order: 3;
+    font-size: 0.875rem;
+  }
+  .obra__frase {
+    font-size: clamp(1.625rem, 7.4vw, 2.125rem);
+  }
+  .obra__credito {
+    left: 10px;
+    right: auto;
+    font-size: 0.625rem;
+  }
+}
+
+/* dez meses, de junho a abril: um traço por mês */
+.obra__trilho {
+  position: relative;
+  height: 8px;
+  background:
+    linear-gradient(var(--linha), var(--linha)) 0 50% / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, rgba(28, 58, 55, 0.35) 0 1px, transparent 1px calc(100% / 10 - 0.12px)) 0 0 / calc(100% + 1px) 100% no-repeat;
+}
+
+.obra__marcador {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--t, 1) * 100%);
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--esmeralda);
+  box-shadow: 0 0 0 3px var(--branco), 0 0 0 4px var(--ouro);
+  transition: opacity 0.3s var(--ease-estado);
+}
+
+.obra__datas {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--verde-apoio);
+  font-feature-settings: "tnum" 1;
+}
+
+.obra__hoje {
+  font-weight: 500;
+  color: var(--esmeralda);
+}
+
+/* ----- com movimento: a seção fica presa e a rolagem passa os quadros */
+/* rolagem curta na obra (~3% de tela por quadro); o anoitecer ganha 4x isso por quadro (secoes.js, PESO_FIM) */
+.obra--viva {
+  height: 520svh;
+}
+
+.obra--viva .obra__palco {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding-top: var(--topo);
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.obra--viva .obra__quadro {
+  aspect-ratio: auto;
+}
+
+.obra--viva .obra__poster {
+  opacity: 0;
+}
+
+.obra--viva .obra__frase {
+  visibility: visible;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s var(--ease-estado), transform 0.8s var(--ease-revela);
+}
+
+.obra--viva .obra__frase.ativa {
+  opacity: 1;
+  transform: none;
+}
+
+.obra--antes .obra__marcador {
+  opacity: 0.35;
+}
+
+/* celular: a obra ocupa a tela inteira; a frase, o apoio e a régua ficam por cima, embaixo, sobre um degradê escuro
+   que lê igual sobre o canteiro claro e sobre a noite */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .obra--viva .obra__palco {
+    padding-top: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .obra--viva .obra__quadro,
+  .obra--viva .obra__faixa {
+    grid-area: 1 / 1;
+  }
+  .obra--viva .obra__faixa {
+    position: relative;
+    z-index: 2;
+    align-self: end;
+    padding-top: 140px;
+    padding-bottom: calc(26px + env(safe-area-inset-bottom));
+    background: linear-gradient(rgba(7, 22, 19, 0), rgba(7, 22, 19, 0.55) 34%, rgba(7, 22, 19, 0.88));
+  }
+  .obra--viva .obra__frase {
+    color: var(--branco);
+  }
+  .obra--viva .obra__frase em {
+    color: #e3cfa6;
+  }
+  .obra--viva .obra__apoio {
+    color: rgba(255, 255, 255, 0.84);
+  }
+  .obra--viva .obra__datas {
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .obra--viva .obra__hoje {
+    color: var(--branco);
+  }
+  .obra--viva .obra__trilho {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)) 0 50% / 100% 1px no-repeat,
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.5) 0 1px, transparent 1px calc(100% / 10 - 0.12px)) 0 0 / calc(100% + 1px) 100% no-repeat;
+  }
+  .obra--viva .obra__marcador {
+    background: var(--ouro);
+    box-shadow: 0 0 0 3px rgba(7, 22, 19, 0.9), 0 0 0 4px rgba(227, 207, 166, 0.9);
+  }
+  .obra--viva .obra__credito {
+    top: calc(var(--topo) + 10px);
+    bottom: auto;
+  }
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .obra__quadro {
+    aspect-ratio: 16 / 9;
+  }
+  .obra__faixa {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.75fr);
+    grid-template-rows: auto auto;
+    column-gap: clamp(40px, 6vw, 120px);
+    row-gap: 8px;
+    padding: 26px var(--margem) 30px;
+  }
+  .obra__frases {
+    grid-column: 1;
+  }
+  .obra__apoio {
+    grid-column: 1;
+  }
+  .obra__regua {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    padding-bottom: 6px;
+  }
+  .obra__credito {
+    right: var(--margem);
+    bottom: 14px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .obra--viva .obra__frase {
+    transition: none;
+  }
+}
+
+/* ============================================================ o voo
+   A câmera sai do vale do hero, contorna o resort e desce até a piscina do Dia 2. A rolagem percorre os quadros
+   (assets/voo/d e m); as marcas seguem pontos do resort calculados da mesma câmera (assets/voo/pontos.json).
+   Sem script ou com movimento reduzido: a vista aérea parada, sem marcas. */
+.voo {
+  position: relative;
+  background: var(--branco);
+}
+
+.voo__palco {
+  position: relative;
+}
+
+.voo__quadro {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--nevoa);
+}
+
+.voo__poster,
+.voo__tela {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.voo__tela {
+  opacity: 0;
+}
+
+.voo--vivo .voo__tela {
+  opacity: 1;
+}
+
+/* entra e sai pelo branco da página: sem degrau entre a seção anterior, o voo e o programa */
+.voo__quadro::before,
+.voo__quadro::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 14%;
+  pointer-events: none;
+}
+
+.voo__quadro::before {
+  top: 0;
+  background: linear-gradient(var(--nevoa), rgba(243, 245, 242, 0));
+}
+
+/* no meio do voo a névoa do topo desce (secoes.js põe --bruma de 0 a 1) */
+.voo--vivo .voo__quadro::before {
+  height: calc(14% + 12% * var(--bruma, 0));
+}
+
+.voo__quadro::after {
+  bottom: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0), var(--branco));
+}
+
+.voo__fato {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  z-index: 3;
+  margin: 0;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  color: var(--verde);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+/* marca presa a um ponto do resort: um ponto, um fio de ouro que sobe e o nome */
+.voo__marca {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  margin: 0;
+  display: none;
+  pointer-events: none;
+  transform: translate3d(var(--x, -999px), var(--y, -999px), 0);
+  opacity: var(--o, 0);
+  transition: opacity 0.35s var(--ease-estado);
+}
+
+.voo--vivo .voo__marca {
+  display: block;
+}
+
+.voo__marca i {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--branco);
+  box-shadow: 0 0 0 1.5px var(--ouro);
+}
+
+.voo__marca i::after {
+  content: "";
+  position: absolute;
+  left: 3.25px;
+  bottom: 8px;
+  width: 1.5px;
+  height: 56px;
+  background: var(--ouro);
+}
+
+.voo__marca span {
+  position: absolute;
+  left: -2px;
+  bottom: 66px;
+  white-space: nowrap;
+  padding: 6px 10px 7px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: var(--branco);
+  background: rgba(7, 22, 19, 0.82);
+}
+
+.voo__marca--esq span {
+  left: auto;
+  right: -2px;
+}
+
+.voo__marca b {
+  display: block;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 400;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: #e3cfa6;
+}
+
+.voo__texto {
+  position: relative;
+  z-index: 4;
+  padding: 28px var(--margem) 8px;
+}
+
+.voo__titulo {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(2rem, 4vw, 3.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+  text-wrap: balance;
+}
+
+.voo__apoio {
+  margin: 14px 0 0;
+  max-width: 34ch;
+  font-size: clamp(1rem, 1.2vw, 1.1875rem);
+  line-height: 1.5;
+  color: var(--verde);
+}
+
+/* com o voo vivo, o palco fica preso enquanto a rolagem atravessa a seção */
+.voo--vivo {
+  height: 340vh;
+}
+
+.voo--vivo .voo__palco {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--topo);
+  overflow: hidden;
+}
+
+/* celular: o voo ocupa a tela inteira, como no largo; o texto fica por cima, embaixo, sobre um degradê escuro
+   (a barra de compra sai da frente enquanto o voo está preso, secoes.js) */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .voo--vivo .voo__palco {
+    display: block;
+    padding-top: 0;
+  }
+  .voo--vivo .voo__quadro {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  .voo--vivo .voo__quadro::after {
+    display: none;
+  }
+  .voo--vivo .voo__fato {
+    top: calc(var(--topo) + 10px);
+    bottom: auto;
+    font-size: 0.6875rem;
+  }
+  .voo--vivo .voo__texto {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 120px var(--margem) calc(32px + env(safe-area-inset-bottom));
+    background: linear-gradient(rgba(7, 22, 19, 0), rgba(7, 22, 19, 0.5) 38%, rgba(7, 22, 19, 0.86));
+  }
+  .voo--vivo .voo__titulo {
+    color: var(--branco);
+  }
+  .voo--vivo .voo__apoio {
+    color: rgba(255, 255, 255, 0.86);
+  }
+}
+
+/* largo: o quadro ocupa a tela inteira e o texto fica por cima, no canto de baixo à esquerda */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .voo__quadro {
+    aspect-ratio: auto;
+    height: 100vh;
+    height: 100svh;
+  }
+  .voo--vivo .voo__quadro::before,
+  .voo__quadro::before {
+    height: calc(18% + 12% * var(--bruma, 0));
+  }
+  .voo__quadro::after {
+    height: 30%;
+  }
+  .voo__texto {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 0 var(--margem) clamp(40px, 6vh, 72px) max(var(--margem), calc((100vw - 1280px) / 2));
+    max-width: 640px;
+  }
+  .voo--vivo .voo__palco {
+    display: block;
+    padding-top: 0;
+  }
+  /* véu de luz atrás do texto: a data em ouro e o apoio se leem sobre o reflexo do lago */
+  .voo__texto::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: -20%;
+    right: -30%;
+    top: -40%;
+    bottom: -10%;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(246, 248, 245, 0.92), rgba(246, 248, 245, 0.75) 55%, rgba(246, 248, 245, 0));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voo__marca {
+    transition: none;
+  }
+}
+
+/* ============================================================ os dois dias
+   linha do tempo vertical: à direita o título e os dois dias, um embaixo do outro, presos a uma linha que enche de ouro
+   com a rolagem; à esquerda, no largo, um quadro preso que troca a mesa pelo resort quando o Dia 2 chega (--troca de
+   0 a 1, secoes.js). No celular o quadro some e cada dia leva a própria imagem */
+.programa__palco {
+  display: none;
+}
+
+.programa__cabeca {
+  display: grid;
+  gap: 22px;
+  margin-bottom: clamp(48px, 6vw, 80px);
+}
+
+.programa__cabeca .selo,
+.programa__cabeca .lede {
+  margin: 0;
+}
+
+.programa__cabeca .titulo {
+  max-width: 12em;
+}
+
+.linha {
+  --recuo: clamp(28px, 3vw, 44px);
+  position: relative;
+  display: grid;
+  gap: clamp(56px, 7vw, 104px);
+  margin: 0;
+  padding: 0 0 0 var(--recuo);
+  list-style: none;
+}
+
+/* o fio de fundo e o fio de ouro por cima, que cresce com a rolagem (sem script fica cheio) */
+.linha::before,
+.linha::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  bottom: 0;
+  width: 1px;
+}
+
+.linha::before {
+  background: var(--linha);
+}
+
+.linha::after {
+  background: var(--ouro);
+  transform-origin: top center;
+  transform: scaleY(var(--progresso, 1));
+}
+
+.dia {
+  position: relative;
+}
+
+/* o marco do dia na linha: vazio até a linha chegar, cheio depois */
+.dia::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--recuo) - 5px);
+  top: 0.5em;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid var(--ouro);
+  background: var(--marfim);
+  transition: background-color 0.35s var(--ease-estado);
+}
+
+.dia.passou::before {
+  background: var(--ouro);
+}
+
+.dia__num {
+  margin: 0 0 10px;
+  font-weight: 400;
+  font-size: clamp(3.5rem, 7vw, 6.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  color: var(--ouro-texto);
+}
+
+.dia__onde {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(1.875rem, 3vw, 2.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--tinta);
+}
+
+.dia__quando {
+  margin: 8px 0 0;
+  color: var(--verde);
+}
+
+.dia__foto {
+  position: relative;
+  margin: 24px 0 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--nevoa);
+}
+
+.dia__foto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dia__foto .dia__foto-palco {
+  object-position: 50% 22%;
+}
+
+.dia__foto figcaption {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  color: var(--verde);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.dia__agenda {
+  margin: clamp(24px, 3vw, 36px) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--linha);
+}
+
+.dia__agenda li {
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr);
+  column-gap: 20px;
+  row-gap: 6px;
+  align-items: baseline;
+  padding: 16px 0 18px;
+  border-bottom: 1px solid var(--linha);
+}
+
+.hora {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  color: var(--verde-apoio);
+  font-feature-settings: "tnum" 1;
+}
+
+.dia__ato {
+  font-weight: 500;
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  color: var(--tinta);
+}
+
+.dia__nota {
+  grid-column: 2;
+  max-width: 46ch;
+  line-height: 1.55;
+  color: var(--verde);
+  text-wrap: pretty;
+}
+
+/* celular: o horário sobe para cima da atividade, e o texto ganha a largura toda */
+@media (max-width: 599px) {
+  .dia__agenda li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dia__nota {
+    grid-column: 1;
+  }
+}
+
+/* largo: o quadro preso à esquerda, o texto à direita; as imagens de cada dia saem do texto */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .programa__grade {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(48px, 6vw, 112px);
+    align-items: start;
+  }
+
+  .programa__palco {
+    display: block;
+    position: sticky;
+    top: calc(var(--topo) + 32px);
+  }
+
+  .programa__quadro {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    max-height: calc(100svh - var(--topo) - 64px);
+    background: var(--tinta);
+  }
+
+  .programa__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* o Nezio no palco: o quadro fica no corpo inteiro, com o telão do Clube atrás */
+  .programa__img--palco {
+    object-position: 50% 40%;
+  }
+
+  /* o resort sobe por cima da mesa, de baixo para cima, e assenta de leve */
+  .programa__img--resort {
+    clip-path: inset(calc((1 - var(--troca, 0)) * 100%) 0 0 0);
+    transform: scale(calc(1.06 - var(--troca, 0) * 0.06));
+  }
+
+  .programa__etiqueta,
+  .programa__fonte {
+    position: absolute;
+    margin: 0;
+  }
+
+  .programa__etiqueta {
+    left: 14px;
+    bottom: 14px;
+    padding: 6px 10px;
+    font-family: "Proza Libre", sans-serif;
+    font-weight: 500;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--branco);
+    background: rgba(7, 22, 19, 0.6);
+  }
+
+  .programa__fonte {
+    top: 12px;
+    right: 12px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    color: var(--verde);
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .programa__etiqueta span[data-dia="2"],
+  .programa__fonte span[data-dia="2"],
+  .programa--dia2 .programa__etiqueta span[data-dia="1"],
+  .programa--dia2 .programa__fonte span[data-dia="1"] {
+    display: none;
+  }
+
+  .programa--dia2 .programa__etiqueta span[data-dia="2"],
+  .programa--dia2 .programa__fonte span[data-dia="2"] {
+    display: inline;
+  }
+
+  .programa__cabeca .titulo {
+    max-width: 11em;
+  }
+
+  .dia__foto {
+    display: none;
+  }
+}
+
+/* ============================================================ edição anterior */
+.edicao {
+  background: var(--branco);
+}
+
+.edicao__cabeca {
+  margin-bottom: clamp(40px, 5vw, 72px);
+}
+
+.filme {
+  position: relative;
+  margin: 0;
+}
+
+/* o filme original é de 360p: um grão fino por cima segura a imagem ampliada */
+.filme::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  aspect-ratio: 16 / 9;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+}
+
+.filme__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--tinta);
+  object-fit: cover;
+}
+
+.filme__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--linha);
+  font-size: 0.875rem;
+  color: var(--verde-apoio);
+}
+
+.filme__barra figcaption {
+  flex: 1;
+}
+
+.filme__som {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px 0 12px;
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  background: var(--branco);
+  font: inherit;
+  font-weight: 500;
+  color: var(--verde);
+  cursor: pointer;
+  transition: border-color 0.25s var(--ease-toque);
+}
+
+.filme__som:hover {
+  border-color: var(--ouro);
+}
+
+.filme__icone {
+  width: 18px;
+  height: 14px;
+  background:
+    linear-gradient(currentColor, currentColor) 0 50% / 3px 6px no-repeat,
+    linear-gradient(currentColor, currentColor) 5px 50% / 3px 10px no-repeat,
+    linear-gradient(currentColor, currentColor) 10px 50% / 3px 14px no-repeat,
+    linear-gradient(currentColor, currentColor) 15px 50% / 3px 8px no-repeat;
+  opacity: 0.45;
+}
+
+.filme__som[aria-pressed="true"] .filme__icone {
+  opacity: 1;
+}
+
+.filme__link {
+  /* alvo de toque de 44px sem mudar a barra: o botão "Ouvir" ao lado já tem essa altura */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--verde);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(185, 142, 74, 0.8);
+  text-underline-offset: 5px;
+}
+
+.edicao__fotos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 1.2vw, 18px);
+  margin-top: clamp(8px, 1.2vw, 18px);
+}
+
+/* as fotos do palco têm o teto escuro em cima: o quadro desce para as pessoas */
+.edicao__fotos img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: 50% 78%;
+  display: block;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .edicao .miolo {
+    display: grid;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    column-gap: clamp(40px, 5vw, 88px);
+    row-gap: clamp(8px, 1.2vw, 18px);
+    align-items: end;
+  }
+  .edicao__cabeca {
+    margin-bottom: 0;
+    padding-bottom: 72px;
+  }
+  .edicao__fotos {
+    grid-column: 1 / -1;
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .edicao__fotos {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================ ingressos
+   a planta é uma maquete à noite: o verde profundo do Clube como chão, paredes em creme fino. O ingresso escolhido
+   acende as salas em que ele entra (luz dourada, porta aberta); o que fica de fora continua apagado, com cadeado.
+   Ao lado, os dois ingressos são cartões de acesso, e o botão único fica logo abaixo do que foi escolhido */
+.ingressos__cabeca {
+  margin-bottom: clamp(36px, 4vw, 56px);
+}
+
+.ingressos__corpo {
+  display: grid;
+  gap: 28px;
+}
+
+/* ------------------------------------------------------------ os cartões de acesso */
+.chaves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* celular de 320px: o selo "Mais completo" alargava o Premium e espremia o VIP em uma palavra por linha;
+   os dois cartões ficam um embaixo do outro */
+@media (max-width: 359px) {
+  .chaves {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chave {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 100%;
+  padding: 16px 16px 18px;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--branco);
+  font: inherit;
+  text-align: left;
+  color: var(--verde);
+  cursor: pointer;
+  transition: border-color 0.3s var(--ease-estado), background-color 0.3s var(--ease-estado),
+    color 0.3s var(--ease-estado), box-shadow 0.3s var(--ease-estado), transform 0.2s var(--ease-toque);
+}
+
+.chave:active {
+  transform: scale(0.985);
+}
+
+.chave:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 3px;
+}
+
+/* a linha do selo existe nos dois cartões: os nomes ficam na mesma altura */
+.chave__topo {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  /* o círculo de escolhido mora no canto: o selo não encosta nele */
+  padding-right: 26px;
+}
+
+.chave__tipo,
+.chave__selo {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.chave__tipo {
+  color: var(--ouro-texto);
+}
+
+.chave__selo {
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(180, 138, 69, 0.14);
+  color: var(--ouro-texto);
+}
+
+.chave__nome {
+  font-weight: 500;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+}
+
+.chave__linha {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--verde-apoio);
+}
+
+/* escolhido: o cartão vira a chave do Clube, verde profundo com fio de ouro */
+.chave[aria-selected="true"] {
+  border-color: var(--ouro);
+  background: linear-gradient(160deg, #164139, var(--floresta) 70%);
+  box-shadow: 0 18px 40px -24px rgba(7, 22, 19, 0.7), inset 0 1px 0 rgba(239, 225, 201, 0.12);
+  cursor: default;
+}
+
+.chave[aria-selected="true"] .chave__nome {
+  color: var(--branco);
+}
+
+.chave[aria-selected="true"] .chave__linha {
+  color: rgba(239, 225, 201, 0.82);
+}
+
+.chave[aria-selected="true"] .chave__tipo {
+  color: var(--ouro-claro);
+}
+
+.chave[aria-selected="true"] .chave__selo {
+  background: rgba(212, 176, 115, 0.18);
+  color: var(--ouro-claro);
+}
+
+/* a marca de escolhido: um ponto de luz no canto, a mesma luz das salas */
+.chave::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--linha);
+  border-radius: 50%;
+  transition: background-color 0.3s var(--ease-estado), border-color 0.3s var(--ease-estado), box-shadow 0.3s var(--ease-estado);
+}
+
+.chave[aria-selected="true"]::after {
+  border-color: var(--ouro-claro);
+  background: radial-gradient(circle, var(--floresta) 0 32%, var(--ouro-claro) 34% 100%);
+  box-shadow: 0 0 0 4px rgba(212, 176, 115, 0.16);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chave[aria-selected="false"]:hover {
+    border-color: var(--ouro);
+    box-shadow: 0 14px 30px -24px rgba(7, 22, 19, 0.6);
+  }
+}
+
+/* ------------------------------------------------------------ a planta: planta de apartamento
+   papel branco, parede em tinta, piso das salas incluídas em tom de papel claro; o que fica de fora é hachurado,
+   com parede fraca e cadeado. Sem cor de destaque: a diferença é aberto contra fechado */
+.acessos {
+  margin: 0;
+  padding: clamp(18px, 2.4vw, 32px);
+  border: 1px solid var(--linha);
+  border-radius: 18px;
+  background: var(--branco);
+  box-shadow: 0 24px 50px -40px rgba(7, 22, 19, 0.45);
+}
+
+.acessos__planta {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.acessos__planta--larga {
+  display: none;
+}
+
+.acessos pattern line {
+  stroke: rgba(28, 58, 55, 0.16);
+  stroke-width: 1.1;
+}
+
+/* a parede: fechada, fina e fraca sobre o hachurado; aberta, o traço grosso de parede de planta */
+.sala > rect:not(.sala__luz) {
+  fill: url(#hachura-l);
+  stroke: rgba(28, 58, 55, 0.3);
+  stroke-width: 1.5;
+  transition: stroke 0.45s var(--ease-estado), stroke-width 0.45s var(--ease-estado), fill-opacity 0.45s var(--ease-estado);
+}
+
+.acessos__planta--alta .sala > rect:not(.sala__luz) {
+  fill: url(#hachura-a);
+}
+
+.sala.aberta > rect:not(.sala__luz) {
+  fill-opacity: 0;
+  stroke: var(--tinta);
+  stroke-width: 3.5;
+}
+
+/* o piso da sala incluída: papel claro, quente */
+.sala__luz {
+  fill: #f6f1e6;
+  stroke: none;
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-estado);
+  transition-delay: var(--atraso, 0s);
+}
+
+.sala.aberta .sala__luz {
+  opacity: 1;
+}
+
+/* zonas de assento dentro do auditório: piso marcado, sem parede */
+.sala--zona .sala__luz {
+  display: none;
+}
+
+.sala--zona > rect:not(.sala__luz) {
+  fill: none;
+  stroke: rgba(28, 58, 55, 0.25);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.sala--zona.aberta > rect:not(.sala__luz) {
+  fill: rgba(180, 138, 69, 0.1);
+  fill-opacity: 1;
+  stroke: var(--ouro);
+  stroke-width: 1.4;
+  stroke-dasharray: none;
+}
+
+/* online e o resort não são salas deste prédio: contorno tracejado */
+.sala--online > rect:not(.sala__luz),
+.sala--fora > rect:not(.sala__luz) {
+  stroke-width: 1.3;
+  stroke-dasharray: 5 5;
+}
+
+.sala--online.aberta > rect:not(.sala__luz),
+.sala--fora.aberta > rect:not(.sala__luz) {
+  stroke: var(--tinta);
+  stroke-width: 1.5;
+}
+
+.sala text {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  fill: rgba(28, 58, 55, 0.4);
+  transition: fill 0.45s var(--ease-estado);
+}
+
+.sala .sala__sub {
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.sala.aberta text {
+  fill: var(--tinta);
+}
+
+.sala.aberta .sala__sub {
+  fill: var(--verde-apoio);
+}
+
+.sala--zona.aberta text {
+  font-weight: 600;
+}
+
+/* a porta: o vão na parede, a folha e o arco por onde ela abre */
+.porta__vao {
+  stroke: var(--branco);
+  stroke-width: 6;
+}
+
+.porta__folha,
+.porta__arco {
+  fill: none;
+  stroke: rgba(28, 58, 55, 0.3);
+  stroke-width: 1.2;
+}
+
+.porta__folha {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: rotate(90deg);
+  transition: stroke 0.45s var(--ease-estado), transform 0.7s var(--ease-estado);
+  transition-delay: var(--atraso, 0s);
+}
+
+.sala.aberta .porta__folha {
+  transform: rotate(0deg);
+  stroke: var(--tinta);
+  stroke-width: 1.6;
+}
+
+.porta__arco {
+  stroke-dasharray: 2 3;
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-estado);
+  transition-delay: calc(var(--atraso, 0s) + 0.25s);
+}
+
+.sala.aberta .porta__arco {
+  opacity: 1;
+  stroke: var(--tinta);
+}
+
+/* o cadeado: só nas salas que o ingresso escolhido não abre */
+.sala__cadeado {
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-estado);
+}
+
+.sala__cadeado path,
+.sala__cadeado rect {
+  fill: var(--branco);
+  stroke: var(--ouro-texto);
+  stroke-width: 1.4;
+}
+
+.sala__cadeado path {
+  fill: none;
+}
+
+.sala__cadeado text {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  fill: var(--ouro-texto);
+}
+
+.sala.trancada .sala__cadeado {
+  opacity: 1;
+}
+
+/* entrada: enquanto as paredes se desenham, nenhuma sala abre */
+.acessos.apagada .sala__luz,
+.acessos.apagada .sala__cadeado,
+.acessos.apagada .porta__arco {
+  opacity: 0;
+}
+
+.acessos.apagada .sala.aberta > rect:not(.sala__luz) {
+  fill-opacity: 1;
+  stroke: rgba(28, 58, 55, 0.3);
+  stroke-width: 1.5;
+}
+
+.acessos.apagada .sala--zona.aberta > rect:not(.sala__luz) {
+  fill: none;
+  stroke: rgba(28, 58, 55, 0.25);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.acessos.apagada .sala.aberta text {
+  fill: rgba(28, 58, 55, 0.4);
+}
+
+.acessos.apagada .sala.aberta .porta__folha {
+  transform: rotate(90deg);
+  stroke: rgba(28, 58, 55, 0.3);
+}
+
+.acessos__escala {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  fill: var(--verde-apoio);
+  text-transform: uppercase;
+}
+
+.acessos__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: 18px;
+  font-size: 0.8125rem;
+  color: var(--verde-apoio);
+}
+
+.acessos__legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.acessos__legenda span::before {
+  content: "";
+  width: 16px;
+  height: 11px;
+}
+
+.acessos__aceso::before {
+  background: #f6f1e6;
+  border: 2px solid var(--tinta);
+}
+
+.acessos__apagado::before {
+  border: 1px solid rgba(28, 58, 55, 0.35);
+  background: repeating-linear-gradient(45deg, rgba(28, 58, 55, 0.2) 0 1px, transparent 1px 4px);
+}
+
+/* ------------------------------------------------------------ o lado: o que o ingresso abre e o botão */
+.ingresso__resumo {
+  margin: 0;
+  max-width: 34ch;
+  font-weight: 500;
+  font-size: clamp(1.1875rem, 1.6vw, 1.5rem);
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+  text-wrap: pretty;
+}
+
+.ingresso__rotulo {
+  margin: 26px 0 10px;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ouro-texto);
+}
+
+/* os destaques: o que esse ingresso tem de seu, marcado com o mesmo visto da lista completa */
+.ingresso__destaques {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.ingresso__destaques li {
+  position: relative;
+  padding: 11px 0 11px 30px;
+  border-bottom: 1px solid var(--linha);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--tinta);
+}
+
+.ingresso__destaques li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 1.15em;
+  width: 11px;
+  height: 6px;
+  border-left: 2px solid var(--esmeralda);
+  border-bottom: 2px solid var(--esmeralda);
+  transform: rotate(-45deg);
+}
+
+/* a lista inteira fica guardada: quem quer conferir abre, quem já decidiu vai direto ao botão */
+.ingresso__tudo {
+  margin-top: 6px;
+}
+
+.ingresso__tudo summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--linha);
+  list-style: none;
+  font-size: 0.9375rem;
+  color: var(--verde);
+  cursor: pointer;
+}
+
+.ingresso__tudo summary::-webkit-details-marker {
+  display: none;
+}
+
+.ingresso__tudo summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ouro-texto);
+}
+
+.ingresso__tudo summary span::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.3s var(--ease-estado);
+}
+
+.ingresso__tudo[open] summary span::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ingresso__tudo summary:hover {
+    color: var(--tinta);
+  }
+}
+
+.ingresso__itens {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.ingresso__itens li {
+  position: relative;
+  padding: 9px 0 9px 24px;
+  border-bottom: 1px solid var(--linha);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--verde);
+}
+
+.ingresso__itens li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 1.05em;
+  width: 9px;
+  height: 5px;
+  border-left: 1.5px solid var(--ouro);
+  border-bottom: 1.5px solid var(--ouro);
+  transform: rotate(-45deg);
+}
+
+/* VIP: o que o Premium acrescenta, dito uma vez, com o caminho para ver */
+.subir {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 16px 18px;
+  border: 1px dashed rgba(180, 138, 69, 0.6);
+  border-radius: 12px;
+  background: rgba(180, 138, 69, 0.06);
+}
+
+.subir__texto {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--verde);
+}
+
+.subir__botao {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--esmeralda);
+  text-decoration: underline;
+  text-decoration-color: var(--ouro);
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+
+.ingressos__acao {
+  margin-top: 28px;
+}
+
+.ingressos__acao .botao {
+  width: 100%;
+  max-width: 420px;
+}
+
+.ingresso__nota {
+  margin: 14px 0 0;
+  max-width: 44ch;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--verde-apoio);
+}
+
+/* desktop: a maquete à esquerda, presa na tela enquanto o lado rola; os cartões e o botão à direita */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .ingressos__corpo {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    grid-template-areas:
+      "planta chaves"
+      "planta lado";
+    grid-template-rows: auto 1fr;
+    column-gap: clamp(40px, 5vw, 88px);
+    row-gap: 32px;
+    align-items: start;
+  }
+  .chaves {
+    grid-area: chaves;
+  }
+  .acessos {
+    grid-area: planta;
+    position: sticky;
+    top: calc(var(--topo) + 28px);
+  }
+  .ingressos__lado {
+    grid-area: lado;
+  }
+  .acessos__planta--larga {
+    display: block;
+  }
+  .acessos__planta--alta {
+    display: none;
+  }
+  .chave {
+    padding: 20px 20px 22px;
+  }
+}
+
+/* ============================================================ como chegar
+   o mapa do Google (sem chave) com três vistas, o trajeto e cada endereço, e um painel com os endereços e a rota no
+   Google Maps ou no Waze. Embaixo, uma tabela só com os quatro aeroportos e o tempo até cada endereço: a barra de cada
+   tempo deixa ver de longe qual aeroporto serve a qual dia */
+.local__cabeca {
+  display: grid;
+  gap: 22px;
+  margin-bottom: clamp(40px, 5vw, 72px);
+}
+
+.local__cabeca .selo,
+.local__cabeca .lede {
+  margin: 0;
+}
+
+/* o mapa: um cartão com o painel dos endereços e o mapa do Google. No celular: vistas, mapa, endereços */
+.mapa {
+  display: grid;
+  grid-template-areas: "tela" "paradas";
+  border: 1px solid var(--linha);
+  background: var(--branco);
+}
+
+.mapa__nome:focus-visible,
+.mapa__botao:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 2px;
+}
+
+.mapa__tela {
+  grid-area: tela;
+  position: relative;
+  height: min(72svh, 460px);
+  background: var(--nevoa);
+}
+
+.mapa__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.mapa__paradas {
+  grid-area: paradas;
+  margin: 0;
+  padding: 24px 20px 28px;
+  list-style: none;
+}
+
+.mapa__parada {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.mapa__nome {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  font-size: clamp(1.375rem, 1.7vw, 1.625rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-align: left;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+/* área de toque de 44px no celular sem mexer no espaçamento da lista: a faixa invisível passa um pouco acima e abaixo */
+.mapa__nome::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8px;
+  bottom: -8px;
+}
+
+/* o nome é clicável (volta o mapa ao trajeto): fio de ouro embaixo e o alfinete do mapa ao lado, sempre visíveis,
+   porque no celular não há passar o mouse */
+.mapa__nome-texto {
+  text-decoration: underline;
+  text-decoration-color: var(--ouro);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition: text-decoration-color 0.2s var(--ease-toque), color 0.2s var(--ease-toque);
+}
+
+.mapa__nome-icone {
+  flex: none;
+  color: var(--ouro-texto);
+  transition: transform 0.2s var(--ease-toque), color 0.2s var(--ease-toque);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mapa__nome:hover .mapa__nome-texto {
+    color: var(--esmeralda);
+    text-decoration-color: var(--esmeralda);
+    text-decoration-thickness: 2px;
+  }
+  .mapa__nome:hover .mapa__nome-icone {
+    color: var(--esmeralda);
+    transform: translateY(-2px);
+  }
+}
+
+.mapa__nome:active .mapa__nome-icone {
+  transform: scale(0.9);
+}
+
+/* a letra do endereço, como os marcadores A e B do mapa */
+.mapa__letra {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--ouro);
+  font-size: 0.875rem;
+  letter-spacing: 0;
+  color: var(--ouro-texto);
+  transition: background-color 0.25s var(--ease-estado), color 0.25s var(--ease-estado), border-color 0.25s var(--ease-estado);
+}
+
+.mapa__letra {
+  border-color: var(--esmeralda);
+  background: var(--esmeralda);
+  color: var(--branco);
+}
+
+.mapa__quando,
+.mapa__endereco {
+  margin: 0;
+  padding-left: 42px;
+}
+
+.mapa__quando {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--verde-apoio);
+}
+
+.mapa__quando span {
+  color: var(--ouro-texto);
+}
+
+.mapa__quando span::after {
+  content: " · ";
+}
+
+.mapa__endereco {
+  line-height: 1.5;
+  color: var(--verde);
+}
+
+.mapa__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding-left: 42px;
+}
+
+.mapa__botao {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--verde);
+  border-radius: 999px;
+  background: var(--verde);
+  font-size: 0.9375rem;
+  color: var(--branco);
+  text-decoration: none;
+  transition: background-color 0.2s var(--ease-toque), color 0.2s var(--ease-toque), transform 0.16s var(--ease-toque);
+}
+
+.mapa__rotulo {
+  flex-basis: 100%;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--verde-apoio);
+}
+
+.mapa__botao--leve {
+  border-color: var(--linha);
+  background: transparent;
+  color: var(--tinta);
+}
+
+.mapa__botao:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mapa__botao:hover {
+    background: var(--esmeralda);
+    border-color: var(--esmeralda);
+    color: var(--branco);
+  }
+}
+
+/* entre os dois endereços: a linha pontilhada da estrada, com o tempo de carro */
+.mapa__entre {
+  position: relative;
+  margin: 14px 0;
+  padding: 14px 0 14px 42px;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  color: var(--verde-apoio);
+}
+
+.mapa__entre::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--ouro);
+}
+
+.aeroportos {
+  margin-top: clamp(64px, 8vw, 120px);
+  padding-top: clamp(28px, 3vw, 40px);
+  border-top: 1px solid var(--linha);
+  display: grid;
+  gap: 20px;
+}
+
+.aeroportos__nota {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--verde);
+}
+
+.voos-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.voos-tabela th,
+.voos-tabela td {
+  padding: 14px 12px 14px 0;
+  border-bottom: 1px solid var(--linha);
+  text-align: left;
+  vertical-align: top;
+}
+
+.voos-tabela thead th {
+  padding-top: 0;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--verde-apoio);
+}
+
+.voos-tabela small {
+  display: block;
+  font-weight: 400;
+  font-size: 0.8125rem;
+  color: var(--verde-apoio);
+}
+
+.voos-tabela thead small {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ouro-texto);
+}
+
+.voos-tabela tbody th {
+  font-weight: 500;
+  color: var(--tinta);
+}
+
+.voos-tabela td {
+  width: 34%;
+}
+
+.voos-tabela td span {
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.875rem;
+  color: var(--verde);
+}
+
+/* a barra do tempo: 110 min ocupam a coluna inteira */
+.voos-tabela td i {
+  display: block;
+  width: calc(var(--min) / 110 * 100%);
+  height: 3px;
+  margin-top: 9px;
+  border-radius: 2px;
+  background: var(--ouro);
+  transform-origin: left center;
+  transform: scaleX(var(--barra, 1));
+}
+
+.local__extras {
+  display: grid;
+  gap: 40px;
+  margin-top: clamp(56px, 7vw, 104px);
+}
+
+.local__titulo {
+  margin: 0 0 12px;
+  font-weight: 500;
+  font-size: 1.375rem;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+
+.local__lista,
+.hoteis {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.local__lista li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--linha);
+  line-height: 1.5;
+  color: var(--verde);
+}
+
+.local__lista strong,
+.hoteis strong {
+  font-weight: 500;
+  color: var(--tinta);
+}
+
+.local__nota {
+  margin: 14px 0 0;
+  font-size: 0.875rem;
+  color: var(--verde-apoio);
+}
+
+.hoteis li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--linha);
+}
+
+.hoteis span {
+  flex: none;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  color: var(--verde-apoio);
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .local__cabeca {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    column-gap: clamp(40px, 5vw, 88px);
+    align-items: end;
+  }
+  .local__cabeca .lede {
+    margin: 0;
+    justify-self: end;
+  }
+  .local__cabeca .selo {
+    grid-column: 1 / -1;
+  }
+  /* desktop: o painel dos endereços à esquerda, o mapa ocupa o resto do cartão */
+  .mapa {
+    grid-template-columns: minmax(380px, 0.4fr) minmax(0, 1fr);
+    grid-template-areas: "paradas tela";
+    align-items: center;
+    margin-bottom: clamp(64px, 7vw, 112px);
+  }
+  .mapa__tela {
+    height: auto;
+    min-height: 600px;
+  }
+  .mapa__paradas {
+    padding: 32px 28px 32px;
+  }
+  .aeroportos {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    column-gap: clamp(40px, 5vw, 88px);
+    align-items: start;
+  }
+  .local__extras {
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(40px, 5vw, 88px);
+  }
+}
+
+/* ============================================================ fechamento
+   o texto fica no céu; a foto do resort vem embaixo e o céu dela continua o fundo do texto */
+.convite {
+  position: relative;
+  overflow: hidden;
+  background: var(--nevoa);
+}
+
+.convite__fundo {
+  --horizonte: 60%;
+  position: relative;
+  z-index: 0;
+  /* sobe só até a copa da oliveira parar abaixo da linha da data */
+  margin-top: -9vw;
+  /* mais baixo que a foto: o reflexo vazio embaixo fica de fora */
+  aspect-ratio: 2.15;
+  overflow: hidden;
+}
+
+.convite__fundo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 12%;
+  /* a câmera avança presa à linha d'água: ali as duas camadas nunca se separam */
+  transform-origin: 50% var(--horizonte);
+}
+
+/* a ala e a água crescem mais que os morros enquanto a câmera chega: a mesma câmera, duas distâncias */
+.convite__longe {
+  transform: scale(var(--zoom-longe, 1.03));
+}
+
+.convite__perto {
+  transform: translate3d(var(--perto-x, 0px), 0, 0) scale(var(--zoom-perto, 1.06));
+}
+
+/* névoa da manhã sobre o vale, entre os morros e a água; anda devagar para o lado */
+.convite__nevoa {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* --horizonte: altura da linha d'água no quadro (o recorte muda entre desktop e celular) */
+  background:
+    radial-gradient(28% 9% at 30% calc(var(--horizonte) - 3%), rgba(236, 241, 238, 0.85), rgba(236, 241, 238, 0)),
+    radial-gradient(22% 7% at 74% calc(var(--horizonte) - 5%), rgba(236, 241, 238, 0.7), rgba(236, 241, 238, 0)),
+    linear-gradient(180deg, rgba(236, 241, 238, 0) calc(var(--horizonte) - 12%), rgba(236, 241, 238, 0.55) calc(var(--horizonte) - 3%), rgba(236, 241, 238, 0) calc(var(--horizonte) + 1%));
+  /* cada nuvem cabe inteira no seu ladrilho de 200%: sem emenda vertical quando o ladrilho se repete */
+  background-size: 200% 100%, 200% 100%, 100% 100%;
+  background-repeat: repeat-x;
+  animation: nevoa-anda 48s linear infinite;
+}
+
+/* a mesma névoa no reflexo: espelhada abaixo da linha d'água, por cima da água (camada da frente) */
+.convite__nevoa--agua {
+  background:
+    radial-gradient(28% 9% at 30% calc(var(--horizonte) + 3%), rgba(236, 241, 238, 0.7), rgba(236, 241, 238, 0)),
+    radial-gradient(22% 7% at 74% calc(var(--horizonte) + 5%), rgba(236, 241, 238, 0.55), rgba(236, 241, 238, 0)),
+    linear-gradient(180deg, rgba(236, 241, 238, 0) calc(var(--horizonte) - 1%), rgba(236, 241, 238, 0.45) calc(var(--horizonte) + 3%), rgba(236, 241, 238, 0) calc(var(--horizonte) + 12%));
+  background-size: 200% 100%, 200% 100%, 100% 100%;
+  background-repeat: repeat-x;
+}
+
+/* com a capela no primeiro plano a névoa da frente cortaria o corpo dela: fica só a névoa de trás */
+.convite__nevoa--agua {
+  display: none;
+}
+
+@keyframes nevoa-anda {
+  from { background-position: 0 0, 100% 0, 0 0; }
+  to { background-position: -200% 0, -100% 0, 0 0; }
+}
+
+.convite__fundo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--nevoa) 0%, rgba(243, 245, 242, 0) 14%, rgba(243, 245, 242, 0) 78%, var(--branco) 100%);
+}
+
+/* celular: o mesmo plano, recortado em pé em cima da capela */
+@media (max-width: 899px), (max-aspect-ratio: 1/1) {
+  .convite__fundo {
+    --horizonte: 57%;
+    /* a ponta da capela não sobe até a linha da data */
+    margin-top: -1vw;
+    aspect-ratio: 4 / 5;
+  }
+  .convite__fundo img {
+    object-position: 60% 50%;
+  }
+}
+
+.convite__texto {
+  position: relative;
+  z-index: 1;
+  padding: clamp(96px, 14vh, 168px) var(--margem) 0;
+  max-width: calc(1280px + 2 * var(--margem));
+  width: 100%;
+  margin: 0 auto;
+}
+
+.convite__antes {
+  margin: 0;
+  max-width: 34ch;
+  font-size: clamp(1.0625rem, 1.4vw, 1.375rem);
+  line-height: 1.5;
+  color: var(--verde);
+}
+
+.convite__titulo {
+  margin: 22px 0 0;
+  font-weight: 500;
+  font-size: clamp(2.375rem, 5.6vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--tinta);
+}
+
+.convite__titulo span {
+  display: block;
+}
+
+.convite__acoes {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  margin-top: 40px;
+}
+
+.convite__acoes .botao {
+  min-width: min(100%, 300px);
+}
+
+.convite__quando {
+  margin: 24px 0 0;
+  font-family: "Proza Libre", sans-serif;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--verde);
+}
+
+/* ============================================================ rodapé */
+.rodape {
+  display: grid;
+  gap: 32px;
+  padding: 56px var(--margem) calc(96px + env(safe-area-inset-bottom));
+  /* o rodapé fecha no verde profundo do Clube, com o símbolo em ouro, como a assinatura do manual */
+  background: var(--floresta);
+  color: rgba(239, 225, 201, 0.8);
+}
+
+.rodape__marca {
+  width: 132px;
+  aspect-ratio: 200 / 180;
+  background: var(--ouro-claro);
+  -webkit-mask: url("assets/brand/logo-vertical.svg") no-repeat center / contain;
+  mask: url("assets/brand/logo-vertical.svg") no-repeat center / contain;
+}
+
+.rodape__colunas {
+  display: grid;
+  gap: 18px;
+}
+
+.rodape p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.rodape a {
+  color: var(--creme);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(185, 142, 74, 0.8);
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .rodape {
+    grid-template-columns: auto 1fr;
+    align-items: end;
+    gap: 64px;
+    padding-bottom: 56px;
+  }
+  .rodape__colunas {
+    grid-template-columns: repeat(2, max-content);
+    gap: 40px clamp(48px, 6vw, 112px);
+  }
+}
+
+/* ============================================================ troca de ingresso presa no topo (celular) */
+.troca-ingresso {
+  position: fixed;
+  z-index: 39;
+  top: calc(var(--topo) + 10px);
+  left: 50%;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 1px var(--linha), 0 12px 28px -18px rgba(7, 22, 19, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -12px);
+  transition: opacity 0.3s var(--ease-estado), transform 0.4s var(--ease-revela), visibility 0s linear 0.4s;
+}
+
+.troca-ingresso.visivel {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition: opacity 0.3s var(--ease-estado), transform 0.4s var(--ease-revela), visibility 0s;
+}
+
+.troca-ingresso button {
+  min-width: 112px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--verde);
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease-estado), color 0.25s var(--ease-estado);
+}
+
+.troca-ingresso button.ativo {
+  background: var(--floresta);
+  color: var(--branco);
+}
+
+.troca-ingresso button:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 2px;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .troca-ingresso {
+    display: none;
+  }
+}
+
+/* ============================================================ barra de compra no celular */
+.barra-cta {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px var(--margem) calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 -1px 0 var(--linha);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transform: translateY(110%);
+  transition: transform 0.45s var(--ease-revela);
+}
+
+.barra-cta.visivel {
+  transform: none;
+}
+
+.botao--barra {
+  min-height: 52px;
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .barra-cta {
+    display: none;
+  }
+}
+
+/* ============================================================ entradas pela rolagem (só com script e movimento) */
+.js .revela {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .convite__nevoa {
+    animation: none;
+  }
+  .js .revela {
+    opacity: 1;
+    transform: none;
+  }
+  .topo,
+  .barra-cta,
+  .perfil,
+  .lugar circle,
+  .mesa__luz,
+  .porta__folha,
+  .porta__arco {
+    transition: none;
+  }
+}
+
+/* ============================================================ a virada em itálico
+   só onde a palavra carrega a virada da frase (decisão, curiosos, conexões certas); mesma tinta do resto */
+.titulo em,
+.manifesto__frase em,
+.convite__titulo em {
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
