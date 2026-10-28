@@ -5,6 +5,8 @@
 import { h, $, ICONE, aviso, anunciar, confirmar, dialogo, local, quando, diaDaSemana, msgDeErro, botaoCarregando } from "./ui.js";
 import { noDe, partes, juntar, obter, definir, usarSchema, usarDados, limitesDaLista, itemVazio, rotuloDe, ajudaDe, tipoDe, opcoesDe, nomeDoItem, nomeDaCoisa, contextoDe } from "./campos.js";
 import { prepararHtml, criarPrevia } from "./previa.js";
+import { criarLugares } from "./lugares.js";
+import { criarAbaEvento } from "./evento.js";
 import { TIPOS_IMAGEM, LIMITE_MB, enviarFoto } from "./midia.js";
 
 const ESCONDER = /^(\$schema|versao)$/;
@@ -29,6 +31,8 @@ const ESTILO_PREVIA = `
     -webkit-user-select: text !important; user-select: text !important; caret-color: currentColor; min-width: 1ch; }
   .ed-editando:empty::before, [data-campo]:empty::before { content: "Escreva aqui"; opacity: .45; font-style: italic; }
   [data-campo]:empty { display: inline-block; min-width: 6ch; min-height: 1em; outline: 1px dashed rgba(180,138,69,.7); }
+  @keyframes ed-pisca { 0%, 100% { outline-color: rgba(180,138,69,0); } 50% { outline-color: rgba(180,138,69,1); } }
+  .ed-pisca { outline: 3px solid #b48a45 !important; outline-offset: 6px !important; border-radius: 4px; animation: ed-pisca .8s ease-in-out 3; }
   .ed-token { background: rgba(180,138,69,.22); border-radius: 4px; padding: 0 .12em; cursor: pointer; }
   [data-previa-sem-mapa] { background: #e7ebe6; }
   ::selection { background: rgba(185,142,74,.35); }
@@ -94,22 +98,26 @@ export function abrirEditor(app, { linha, R, schema }) {
     type: "button", class: "alternar__op", "aria-pressed": String(E.disp === d), "data-disp": d,
     onclick: () => trocarDisp(d),
   }, h("span", { html: ICONE[d] }), h("span", { class: "alternar__txt", text: d === "celular" ? "Celular" : "Computador" })));
-  const btnConfig = h("button", { type: "button", class: "botao botao--claro botao--pequeno ed__config", onclick: () => abrirConfiguracoes() },
-    h("span", { html: ICONE.ajustes }), h("span", { class: "ed__config-txt", text: "Configurações" }));
+  // duas abas: a página (editar onde aparece) e o evento (datas, locais, Google: muda no site inteiro)
+  const btnAbas = [["pagina", "Página"], ["evento", "Evento"]].map(([id, nome]) => h("button", {
+    type: "button", role: "tab", class: "abas__aba", id: "aba-" + id, "aria-selected": String(id === "pagina"),
+    "aria-controls": id === "pagina" ? "aba-pagina-painel" : "aba-evento-painel", "data-aba": id, onclick: () => trocarAba(id),
+  }, nome));
+  const abas = h("div", { class: "abas", role: "tablist", "aria-label": "O que editar" }, ...btnAbas);
   const btnPublicar = h("button", { type: "button", class: "botao botao--ouro botao--pequeno", id: "publicar", text: "Publicar", onclick: () => publicar() });
 
   const topo = h("header", { class: "ed__topo" },
     h("a", { class: "ed__voltar", href: "#/", "aria-label": "Voltar para as edições", html: ICONE.voltar }),
     h("div", { class: "ed__nome" }, h("strong", { class: "ed__titulo", text: E.edicao.nome || E.edicao.slug }), estadoEl),
+    abas,
     h("div", { class: "ed__ferramentas" },
       h("div", { class: "ed__historico" }, btnDesfazer, btnRefazer),
-      h("div", { class: "alternar", role: "group", "aria-label": "Ver a prévia como" }, ...btnDisp),
-      btnConfig),
+      h("div", { class: "alternar", role: "group", "aria-label": "Ver a prévia como" }, ...btnDisp)),
     btnPublicar);
 
   const aparelho = h("div", { class: "ed__aparelho" });
   const carregando = h("div", { class: "ed__carregando" }, h("span", { class: "giro", "aria-hidden": "true" }), "Montando a página…");
-  const palco = h("div", { class: "ed__palco" }, aparelho, carregando);
+  const palco = h("div", { class: "ed__palco", role: "tabpanel", id: "aba-pagina-painel", "aria-labelledby": "aba-pagina" }, aparelho, carregando);
   const painelCorpo = h("div", { class: "painel-lado__corpo" });
   const painelTitulo = h("h2", { class: "painel-lado__titulo", id: "painel-lado-titulo" });
   const painelSub = h("p", { class: "painel-lado__sub" });
@@ -127,7 +135,6 @@ export function abrirEditor(app, { linha, R, schema }) {
   const barraBaixo = h("nav", { class: "ed__baixo", "aria-label": "Ferramentas" },
     h("button", { type: "button", class: "ed__baixo-btn", onclick: () => desfazer(), "aria-label": "Desfazer" }, h("span", { html: ICONE.desfazer }), h("span", { text: "Desfazer" })),
     h("button", { type: "button", class: "ed__baixo-btn", onclick: () => refazer(), "aria-label": "Refazer" }, h("span", { html: ICONE.refazer }), h("span", { text: "Refazer" })),
-    h("button", { type: "button", class: "ed__baixo-btn", onclick: () => abrirConfiguracoes() }, h("span", { html: ICONE.ajustes }), h("span", { text: "Configurações" })),
     h("button", { type: "button", class: "ed__baixo-btn", onclick: () => trocarDisp(E.disp === "celular" ? "computador" : "celular") },
       h("span", { class: "ed__baixo-disp", html: ICONE.computador }), h("span", { class: "ed__baixo-disp-txt", text: "Computador" })));
   // barra de edição de texto (celular): aparece com o teclado
@@ -136,7 +143,62 @@ export function abrirEditor(app, { linha, R, schema }) {
     h("button", { type: "button", class: "botao botao--claro botao--pequeno", text: "Cancelar", onpointerdown: (e) => e.preventDefault(), onclick: () => terminarEdicao(false) }),
     btnMais,
     h("button", { type: "button", class: "botao botao--pequeno", text: "Pronto", onpointerdown: (e) => e.preventDefault(), onclick: () => terminarEdicao(true) }));
-  const raiz = h("div", { class: "ed", "data-disp": E.disp }, topo, dica, h("div", { class: "ed__corpo" }, palco, painel), barraBaixo, barraTexto);
+  const lugaresMotor = criarLugares(R, { edicao: true, midiaBase: R.MIDIA_URL, validar: false });
+  const evento = criarAbaEvento({
+    E, R, toque, contextoDe, urlDaMidia: (v) => urlDaMidia(v), baseSite: CONFIG.baseSite,
+    mudar: (fn, o) => mudar(fn, o),
+    desfazer: () => desfazer(),
+    lugaresDe: (cs) => lugaresMotor.lugares(E.dados, cs),
+    irParaLugar: (sel, rotulo) => irParaLugar(sel, rotulo),
+    irParaCampo: async (c) => { trocarAba("pagina"); await esperarPrevia(); irPara(c); },
+    abrirPainelFoto: (img, c) => abrirPainelFoto(img, c),
+    grupoDeCampos: (cs) => grupoDeCampos(cs),
+    camposSemLugar: () => camposDeConfig(),
+    renomear: (v) => renomear(v),
+  });
+  const raiz = h("div", { class: "ed", "data-disp": E.disp, "data-aba": "pagina" }, topo, dica, h("div", { class: "ed__corpo" }, palco, evento.el, painel), barraBaixo, barraTexto);
+
+  function trocarAba(aba) {
+    if (raiz.dataset.aba === aba) return;
+    terminarEdicao(true);
+    fecharPainel();
+    raiz.dataset.aba = aba;
+    btnAbas.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.aba === aba)));
+    // a prévia continua montada por baixo (escondida): ao voltar, ela já está em dia
+    if (aba === "evento") evento.mostrar();
+    else { evento.esconder(); medir(); posicionarSobre(); }
+    anunciar(aba === "evento" ? "Aba Evento" : "Aba Página");
+  }
+
+  // leva até um lugar da página: troca de aba, rola até lá e pisca o contorno
+  async function irParaLugar(seletor, rotulo) {
+    trocarAba("pagina");
+    await esperarPrevia();
+    const doc = previa.doc;
+    const el = doc?.querySelector(seletor);
+    if (!el || !el.getClientRects().length) { aviso(`${rotulo || "Esse lugar"} não aparece na tela agora.`); return; }
+    el.scrollIntoView({ block: "center" });
+    el.classList.remove("ed-pisca");
+    void el.offsetWidth;
+    el.classList.add("ed-pisca");
+    setTimeout(() => el.classList.remove("ed-pisca"), 2600);
+    anunciar(rotulo || "");
+  }
+
+  // a prévia em dia: espera o redesenho que estiver agendado ou em andamento
+  async function esperarPrevia() {
+    await new Promise((r) => setTimeout(r, 120));
+    await renderizando;
+  }
+
+  async function renomear(v) {
+    if (!v || v === E.edicao.nome) return;
+    const { error } = await sb.from("edicoes").update({ nome: v }).eq("id", E.edicao.id);
+    if (error) { aviso("Não foi possível trocar o nome. " + msgDeErro(error), "erro"); return; }
+    E.edicao.nome = v;
+    topo.querySelector(".ed__titulo").textContent = v;
+    aviso("Nome da edição trocado.");
+  }
 
   /* ---------------------------------------------------------------- prévia */
   const previa = criarPrevia(aparelho, { aoCarregar: ligarPagina, estilo: ESTILO_PREVIA });
@@ -842,6 +904,10 @@ export function abrirEditor(app, { linha, R, schema }) {
   }
 
   /* ---------------------------------------------------------------- configurações da edição */
+  function camposDeConfig() {
+    return folhasProfundas("").filter((f) => precisaPainel(f) && !ehAlt(f) && !ehPlanta(f) && !/\.(id)$/.test(f));
+  }
+
   function abrirConfiguracoes() {
     terminarEdicao(true);
     const todos = folhasProfundas("").filter((f) => precisaPainel(f) && !ehAlt(f) && !ehPlanta(f) && !/\.(id)$/.test(f));
@@ -1111,6 +1177,7 @@ export function abrirEditor(app, { linha, R, schema }) {
     anunciar("Refeito");
   }
   function reabrirPainel() {
+    evento.atualizar();
     // os campos do painel mostram valores velhos depois de desfazer: o jeito simples e certo é fechar
     if (E.painel && E.painel.tipo !== "config") fecharPainel();
     else if (E.painel?.tipo === "config") abrirConfiguracoes();
