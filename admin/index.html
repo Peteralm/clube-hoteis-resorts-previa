@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="same-origin">
+  <meta name="theme-color" content="#0c2420">
+  <title>Painel do Clube</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
+          integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o"
+          crossorigin="anonymous" defer></script>
+  <script src="admin.js" defer></script>
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="topo" id="topo" hidden>
+    <a class="topo__marca" href="#/" aria-label="Painel do Clube: voltar para as edições">
+      <img src="../../assets/brand/marca-creme.svg" alt="" width="34" height="34"
+           onerror="this.onerror=null;this.src='../assets/brand/marca-creme.svg'">
+      <span class="topo__nome">Painel do Clube</span>
+    </a>
+    <nav class="topo__acoes" aria-label="Conta">
+      <a class="topo__link" href="../" target="_blank" rel="noopener">Ver o site<span class="sr"> (abre em nova aba)</span></a>
+      <button type="button" class="topo__link" id="sair">Sair</button>
+    </nav>
+  </header>
+
+  <div class="faixa-publicacao" id="faixa-publicacao" role="status" aria-live="polite" hidden></div>
+
+  <main id="conteudo" tabindex="-1">
+    <div class="carregando" id="carregando">
+      <span class="giro" aria-hidden="true"></span>
+      <span>Carregando…</span>
+    </div>
+  </main>
+
+  <div class="avisos" id="avisos" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog class="dialogo" id="dialogo" aria-labelledby="dialogo-titulo">
+    <form method="dialog" class="dialogo__caixa" id="dialogo-form" novalidate>
+      <h2 class="dialogo__titulo" id="dialogo-titulo"></h2>
+      <div class="dialogo__corpo" id="dialogo-corpo"></div>
+      <div class="dialogo__botoes" id="dialogo-botoes"></div>
+    </form>
+  </dialog>
+
+  <noscript><p class="noscript">Este painel precisa de JavaScript ligado no navegador.</p></noscript>
+</body>
+</html>
