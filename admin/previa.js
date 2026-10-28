@@ -41,7 +41,17 @@ const CALCO = `<script>(function(){
   window.__previaDoPainel = true;
 })();<\/script>`;
 
+// O renderizador escreve os caminhos de site/novo/ ("../vendor/", "../assets/"). No pacote publicado (tools/publicar.py)
+// o site fica achatado: vendor/ e assets/ ao lado do index.html, e o novo.css publicado não tem mais "../assets/".
+// O CSS do site (que a prévia busca de qualquer jeito) diz em qual dos dois a prévia está, sem pedido extra.
+async function ehPacote(base) {
+  const css = await cssDe(new URL("novo.css", base).href);
+  return !!css && !css.includes("../assets/");
+}
+
 export async function prepararHtml(html, { base }) {
+  // mesma troca que tools/publicar.py faz no index.html publicado
+  if (await ehPacote(base)) html = html.replaceAll("../vendor/", "vendor/").replaceAll("../assets/", "assets/");
   const doc = new DOMParser().parseFromString(html, "text/html");
   const head = doc.head;
   // endereços relativos do site (assets/, ../vendor) resolvem como se a página estivesse em /novo/
