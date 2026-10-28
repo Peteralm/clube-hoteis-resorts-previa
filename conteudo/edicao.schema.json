@@ -1,0 +1,2121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "edicao.schema.json",
+  "title": "Edição do Clube de Negócios Hotéis & Resorts",
+  "description": "Dados de uma edição da landing page. tools/gerar.py valida contra este schema e gera site/novo/index.html.",
+  "x-versao-schema": 1,
+  "x-grupos": [
+    "Datas e locais",
+    "Ingressos",
+    "Palestrantes",
+    "Fotos e textos"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "versao",
+    "datas",
+    "ingressos",
+    "palestrantes",
+    "textos"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "versao": {
+      "const": 1,
+      "title": "Versão do formato",
+      "x-widget": "texto",
+      "readOnly": true,
+      "x-ordem": 0
+    },
+    "datas": {
+      "type": "object",
+      "title": "Datas e locais",
+      "x-ordem": 39,
+      "additionalProperties": false,
+      "properties": {
+        "dias": {
+          "type": "array",
+          "title": "Os dois dias",
+          "x-widget": "lista",
+          "x-ordem": 21,
+          "items": {
+            "type": "object",
+            "title": "Dia",
+            "x-ordem": 20,
+            "additionalProperties": false,
+            "properties": {
+              "data": {
+                "type": "string",
+                "title": "Data",
+                "x-widget": "data",
+                "x-ordem": 1,
+                "description": "O dia da semana e todas as datas do site saem daqui.",
+                "format": "date",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "chegada": {
+                "type": "string",
+                "title": "Hora de chegada",
+                "x-widget": "hora",
+                "x-ordem": 2,
+                "description": "Aparece no mapa (ex.: 08:30 vira 08h30).",
+                "pattern": "^\\d{2}:\\d{2}$"
+              },
+              "local": {
+                "type": "string",
+                "title": "Nome do local",
+                "x-widget": "texto",
+                "x-ordem": 3,
+                "description": "Ex.: Plataforma Global.",
+                "minLength": 1
+              },
+              "artigo": {
+                "type": "string",
+                "title": "Artigo do nome do local",
+                "x-widget": "escolha",
+                "x-ordem": 4,
+                "description": "\"a\" para \"a Plataforma Global\"; \"o\" para \"o Resort das Oliveiras\".",
+                "enum": [
+                  "a",
+                  "o"
+                ]
+              },
+              "endereco": {
+                "type": "string",
+                "title": "Endereço",
+                "x-widget": "texto",
+                "x-ordem": 5,
+                "description": "Rua e número.",
+                "minLength": 1
+              },
+              "cidade": {
+                "type": "string",
+                "title": "Cidade (curta)",
+                "x-widget": "texto",
+                "x-ordem": 6,
+                "description": "Ex.: Alphaville. Usada na programação, na tabela de aeroportos e no fechamento.",
+                "minLength": 1
+              },
+              "localidade": {
+                "type": "string",
+                "title": "Bairro e cidade",
+                "x-widget": "texto",
+                "x-ordem": 7,
+                "description": "Ex.: Alphaville, Barueri. Usada no endereço do mapa e no Google.",
+                "minLength": 1
+              },
+              "uf": {
+                "type": "string",
+                "title": "UF",
+                "x-widget": "texto",
+                "x-ordem": 8,
+                "description": "Ex.: SP.",
+                "pattern": "^[A-Z]{2}$"
+              },
+              "busca_mapa": {
+                "type": "string",
+                "title": "Busca no Google Maps",
+                "x-widget": "texto",
+                "x-ordem": 9,
+                "description": "Como o Google encontra o local (nome, endereço, cidade).",
+                "minLength": 1
+              },
+              "latitude": {
+                "type": "number",
+                "title": "Latitude",
+                "x-ordem": 10,
+                "x-widget": "texto",
+                "description": "Para o Waze e o Google (ex.: -23.501812)."
+              },
+              "longitude": {
+                "type": "number",
+                "title": "Longitude",
+                "x-ordem": 11,
+                "x-widget": "texto",
+                "description": "Ex.: -46.856813."
+              },
+              "foto": {
+                "type": "string",
+                "title": "Foto do dia",
+                "x-widget": "imagem",
+                "x-ordem": 12,
+                "description": "Aparece na programação. Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+                "minLength": 1,
+                "pattern": "^(midia:|assets/)"
+              },
+              "foto_alt": {
+                "type": "string",
+                "title": "Descrição da foto",
+                "x-widget": "texto-longo",
+                "x-ordem": 13,
+                "description": "Para leitores de tela."
+              },
+              "foto_fonte": {
+                "type": "string",
+                "title": "Legenda da foto",
+                "x-widget": "texto",
+                "x-ordem": 14,
+                "description": "Ex.: Edição anterior; Render do projeto."
+              },
+              "agenda": {
+                "type": "array",
+                "title": "Agenda do dia",
+                "x-widget": "lista",
+                "x-ordem": 19,
+                "items": {
+                  "type": "object",
+                  "title": "Horário",
+                  "x-ordem": 18,
+                  "additionalProperties": false,
+                  "properties": {
+                    "hora": {
+                      "type": "string",
+                      "title": "Horário",
+                      "x-widget": "texto",
+                      "x-ordem": 15,
+                      "description": "Como aparece: 08h30, 09h às 20h."
+                    },
+                    "ato": {
+                      "type": "string",
+                      "title": "O que acontece",
+                      "x-widget": "texto",
+                      "x-ordem": 16
+                    },
+                    "nota": {
+                      "type": "string",
+                      "title": "Detalhe (opcional)",
+                      "x-widget": "texto-longo",
+                      "x-ordem": 17
+                    }
+                  },
+                  "required": [
+                    "hora",
+                    "ato",
+                    "nota"
+                  ]
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "data",
+              "chegada",
+              "local",
+              "artigo",
+              "endereco",
+              "cidade",
+              "localidade",
+              "uf",
+              "busca_mapa",
+              "latitude",
+              "longitude",
+              "foto",
+              "foto_alt",
+              "foto_fonte",
+              "agenda"
+            ]
+          },
+          "description": "Dia 1 e Dia 2, em ordem. O desenho da página é de dois dias.",
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "local_curto": {
+          "type": "string",
+          "title": "Local curto",
+          "x-widget": "texto",
+          "x-ordem": 22,
+          "description": "Aparece ao lado da data no topo e no cadastro. Ex.: Alphaville/SP."
+        },
+        "deslocamento": {
+          "type": "string",
+          "title": "Trajeto entre os dias",
+          "x-widget": "texto",
+          "x-ordem": 23,
+          "description": "No mapa, entre A e B. Ex.: cerca de 1h30 de carro · 90 km."
+        },
+        "aeroportos_nota": {
+          "type": "string",
+          "title": "Nota da tabela de aeroportos",
+          "x-widget": "texto-longo",
+          "x-ordem": 24
+        },
+        "aeroportos": {
+          "type": "array",
+          "title": "Aeroportos",
+          "x-widget": "lista",
+          "x-ordem": 29,
+          "items": {
+            "type": "object",
+            "title": "Aeroporto",
+            "x-ordem": 28,
+            "additionalProperties": false,
+            "properties": {
+              "nome": {
+                "type": "string",
+                "title": "Nome",
+                "x-widget": "texto",
+                "x-ordem": 25
+              },
+              "sigla": {
+                "type": "string",
+                "title": "Sigla ou tipo",
+                "x-widget": "texto",
+                "x-ordem": 26,
+                "description": "Ex.: GRU; executivo."
+              },
+              "minutos": {
+                "type": "array",
+                "title": "Minutos de carro até cada dia",
+                "x-widget": "lista",
+                "x-ordem": 27,
+                "items": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "title": "Minutos"
+                },
+                "description": "Um número por dia: até o local do Dia 1, até o local do Dia 2.",
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "nome",
+              "sigla",
+              "minutos"
+            ]
+          }
+        },
+        "como_ir": {
+          "type": "array",
+          "title": "Como ir",
+          "x-widget": "lista",
+          "x-ordem": 33,
+          "items": {
+            "type": "object",
+            "title": "Opção",
+            "x-ordem": 32,
+            "additionalProperties": false,
+            "properties": {
+              "destaque": {
+                "type": "string",
+                "title": "Começo em negrito",
+                "x-widget": "texto",
+                "x-ordem": 30
+              },
+              "texto": {
+                "type": "string",
+                "title": "Resto da frase",
+                "x-widget": "texto",
+                "x-ordem": 31
+              }
+            },
+            "required": [
+              "destaque",
+              "texto"
+            ]
+          }
+        },
+        "como_ir_nota": {
+          "type": "string",
+          "title": "Nota de transporte",
+          "x-widget": "texto-longo",
+          "x-ordem": 34
+        },
+        "hoteis": {
+          "type": "array",
+          "title": "Onde se hospedar",
+          "x-widget": "lista",
+          "x-ordem": 38,
+          "items": {
+            "type": "object",
+            "title": "Hotel",
+            "x-ordem": 37,
+            "additionalProperties": false,
+            "properties": {
+              "nome": {
+                "type": "string",
+                "title": "Hotel",
+                "x-widget": "texto",
+                "x-ordem": 35
+              },
+              "distancia": {
+                "type": "string",
+                "title": "Distância",
+                "x-widget": "texto",
+                "x-ordem": 36,
+                "description": "Ex.: 10 min do resort."
+              }
+            },
+            "required": [
+              "nome",
+              "distancia"
+            ]
+          }
+        }
+      },
+      "required": [
+        "dias",
+        "local_curto",
+        "deslocamento",
+        "aeroportos_nota",
+        "aeroportos",
+        "como_ir",
+        "como_ir_nota",
+        "hoteis"
+      ],
+      "x-grupo": "Datas e locais"
+    },
+    "ingressos": {
+      "type": "object",
+      "title": "Ingressos",
+      "x-ordem": 111,
+      "additionalProperties": false,
+      "properties": {
+        "lista": {
+          "type": "array",
+          "title": "Ingressos",
+          "x-widget": "lista",
+          "x-ordem": 55,
+          "items": {
+            "type": "object",
+            "title": "Ingresso",
+            "x-ordem": 54,
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$",
+                "title": "Código",
+                "description": "Minúsculas, sem espaço (ex.: premium). Não troque depois de publicado.",
+                "x-widget": "texto",
+                "x-ordem": 40
+              },
+              "nome": {
+                "type": "string",
+                "title": "Nome",
+                "x-widget": "texto",
+                "x-ordem": 41,
+                "description": "Ex.: Premium."
+              },
+              "selo": {
+                "type": "string",
+                "title": "Selo (opcional)",
+                "x-widget": "texto",
+                "x-ordem": 42,
+                "description": "Etiqueta sobre o nome. Ex.: Mais completo."
+              },
+              "linha": {
+                "type": "string",
+                "title": "Linha do cartão",
+                "x-widget": "texto-longo",
+                "x-ordem": 43
+              },
+              "resumo": {
+                "type": "string",
+                "title": "Resumo",
+                "x-widget": "texto-longo",
+                "x-ordem": 44,
+                "description": "Primeira frase do painel do ingresso."
+              },
+              "rotulo": {
+                "type": "string",
+                "title": "Título dos destaques",
+                "x-widget": "texto",
+                "x-ordem": 45,
+                "description": "Ex.: Só o Premium abre."
+              },
+              "destaques": {
+                "type": "array",
+                "title": "Destaques",
+                "x-widget": "lista",
+                "x-ordem": 47,
+                "items": {
+                  "type": "string",
+                  "title": "Destaque",
+                  "x-widget": "texto",
+                  "x-ordem": 46
+                },
+                "minItems": 1
+              },
+              "itens": {
+                "type": "array",
+                "title": "Tudo o que está incluído",
+                "x-widget": "lista",
+                "x-ordem": 49,
+                "items": {
+                  "type": "string",
+                  "title": "Item",
+                  "x-widget": "texto",
+                  "x-ordem": 48,
+                  "description": "Palavras entre *asteriscos* saem em itálico dourado."
+                },
+                "minItems": 1
+              },
+              "subir": {
+                "type": "object",
+                "title": "Convite para o ingresso maior (opcional)",
+                "x-ordem": 53,
+                "additionalProperties": false,
+                "properties": {
+                  "texto": {
+                    "type": "string",
+                    "title": "Texto",
+                    "x-widget": "texto-longo",
+                    "x-ordem": 50,
+                    "description": "Deixe vazio para não mostrar."
+                  },
+                  "botao": {
+                    "type": "string",
+                    "title": "Texto do botão",
+                    "x-widget": "texto",
+                    "x-ordem": 51
+                  },
+                  "para": {
+                    "type": "string",
+                    "title": "Código do ingresso de destino",
+                    "x-widget": "texto",
+                    "x-ordem": 52
+                  }
+                },
+                "required": [
+                  "texto",
+                  "botao",
+                  "para"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "nome",
+              "selo",
+              "linha",
+              "resumo",
+              "rotulo",
+              "destaques",
+              "itens",
+              "subir"
+            ]
+          },
+          "description": "O primeiro aparece selecionado.",
+          "minItems": 1
+        },
+        "salas": {
+          "type": "object",
+          "title": "Salas da planta",
+          "x-ordem": 110,
+          "additionalProperties": false,
+          "properties": {
+            "auditorio": {
+              "type": "object",
+              "title": "Auditório",
+              "x-ordem": 61,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 56,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 57,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 58,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 59,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 60,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "area_vip": {
+              "type": "object",
+              "title": "Área VIP",
+              "x-ordem": 67,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 62,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 63,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 64,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 65,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 66,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "assento": {
+              "type": "object",
+              "title": "Assento Premium",
+              "x-ordem": 73,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 68,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 69,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 70,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 71,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 72,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "lounge": {
+              "type": "object",
+              "title": "Lounge VIP",
+              "x-ordem": 79,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 74,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 75,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 76,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 77,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 78,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "camarim": {
+              "type": "object",
+              "title": "Camarim e bastidores",
+              "x-ordem": 85,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 80,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 81,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 82,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 83,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 84,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "almoco": {
+              "type": "object",
+              "title": "Almoço",
+              "x-ordem": 91,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 86,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 87,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 88,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 89,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 90,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "consultoria": {
+              "type": "object",
+              "title": "Consultoria estratégica",
+              "x-ordem": 97,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 92,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 93,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 94,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 95,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 96,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "online": {
+              "type": "object",
+              "title": "Online, pós-evento",
+              "x-ordem": 103,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 98,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 99,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 100,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 101,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 102,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            },
+            "resort": {
+              "type": "object",
+              "title": "Resort",
+              "x-ordem": 109,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome na planta",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 104,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "detalhe": {
+                  "type": "string",
+                  "title": "Subtítulo na planta (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 105,
+                  "description": "Uma linha por linha do desenho."
+                },
+                "nome_celular": {
+                  "type": "string",
+                  "title": "Nome na planta do celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 106,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "detalhe_celular": {
+                  "type": "string",
+                  "title": "Subtítulo no celular (opcional)",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 107,
+                  "description": "Vazio = igual ao de cima."
+                },
+                "abre": {
+                  "type": "array",
+                  "title": "Ingressos que abrem esta sala",
+                  "x-widget": "escolha",
+                  "x-ordem": 108,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "title": "Código do ingresso"
+                  },
+                  "description": "Códigos dos ingressos (ex.: premium, vip).",
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "nome",
+                "detalhe",
+                "nome_celular",
+                "detalhe_celular",
+                "abre"
+              ]
+            }
+          },
+          "required": [
+            "auditorio",
+            "area_vip",
+            "assento",
+            "lounge",
+            "camarim",
+            "almoco",
+            "consultoria",
+            "online",
+            "resort"
+          ],
+          "description": "As salas e o desenho são fixos; aqui muda o nome e quais ingressos abrem cada uma."
+        }
+      },
+      "required": [
+        "lista",
+        "salas"
+      ],
+      "x-grupo": "Ingressos"
+    },
+    "palestrantes": {
+      "type": "object",
+      "title": "Palestrantes",
+      "x-ordem": 149,
+      "additionalProperties": false,
+      "properties": {
+        "hero": {
+          "type": "object",
+          "title": "Rótulos do topo",
+          "x-ordem": 131,
+          "additionalProperties": false,
+          "properties": {
+            "enio": {
+              "type": "object",
+              "title": "Ênio (topo)",
+              "x-ordem": 124,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome",
+                  "x-widget": "texto",
+                  "x-ordem": 122
+                },
+                "fato": {
+                  "type": "string",
+                  "title": "Fato no rótulo",
+                  "x-widget": "texto",
+                  "x-ordem": 123,
+                  "description": "Aparece quando a pessoa está em foco."
+                }
+              },
+              "required": [
+                "nome",
+                "fato"
+              ]
+            },
+            "pablo": {
+              "type": "object",
+              "title": "Pablo (topo)",
+              "x-ordem": 127,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome",
+                  "x-widget": "texto",
+                  "x-ordem": 125
+                },
+                "fato": {
+                  "type": "string",
+                  "title": "Fato no rótulo",
+                  "x-widget": "texto",
+                  "x-ordem": 126,
+                  "description": "Aparece quando a pessoa está em foco."
+                }
+              },
+              "required": [
+                "nome",
+                "fato"
+              ]
+            },
+            "nezio": {
+              "type": "object",
+              "title": "Nezio (topo)",
+              "x-ordem": 130,
+              "additionalProperties": false,
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "title": "Nome",
+                  "x-widget": "texto",
+                  "x-ordem": 128
+                },
+                "fato": {
+                  "type": "string",
+                  "title": "Fato no rótulo",
+                  "x-widget": "texto",
+                  "x-ordem": 129,
+                  "description": "Aparece quando a pessoa está em foco."
+                }
+              },
+              "required": [
+                "nome",
+                "fato"
+              ]
+            }
+          },
+          "required": [
+            "enio",
+            "pablo",
+            "nezio"
+          ],
+          "description": "As três pessoas da imagem do topo são fixas no desenho; aqui muda o texto do rótulo."
+        },
+        "principal": {
+          "type": "object",
+          "title": "Palestrante principal",
+          "x-ordem": 143,
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "title": "Código",
+              "x-widget": "texto",
+              "x-ordem": 132
+            },
+            "nome": {
+              "type": "string",
+              "title": "Nome",
+              "x-widget": "texto",
+              "x-ordem": 133
+            },
+            "foto": {
+              "type": "string",
+              "title": "Retrato",
+              "x-widget": "imagem",
+              "x-ordem": 134,
+              "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+              "minLength": 1,
+              "pattern": "^(midia:|assets/)"
+            },
+            "foto_alt": {
+              "type": "string",
+              "title": "Descrição da foto",
+              "x-widget": "texto-longo",
+              "x-ordem": 135
+            },
+            "bio": {
+              "type": "string",
+              "title": "Descrição",
+              "x-widget": "texto-longo",
+              "x-ordem": 136
+            },
+            "unidades": {
+              "type": "integer",
+              "title": "Unidades (número da grade)",
+              "x-ordem": 137,
+              "x-widget": "texto",
+              "description": "Cada quadrado é uma unidade. Múltiplo de 100 (a grade é em blocos de 100).",
+              "minimum": 100,
+              "maximum": 20000,
+              "multipleOf": 100
+            },
+            "unidades_rotulo": {
+              "type": "string",
+              "title": "Texto das unidades",
+              "x-widget": "texto-longo",
+              "x-ordem": 138
+            },
+            "anos": {
+              "type": "integer",
+              "title": "Anos (régua)",
+              "x-ordem": 139,
+              "x-widget": "texto",
+              "minimum": 1,
+              "maximum": 80
+            },
+            "anos_rotulo": {
+              "type": "string",
+              "title": "Texto dos anos",
+              "x-widget": "texto",
+              "x-ordem": 140
+            },
+            "premio": {
+              "type": "string",
+              "title": "Prêmio",
+              "x-widget": "texto",
+              "x-ordem": 141
+            },
+            "premio_de": {
+              "type": "string",
+              "title": "Quem deu o prêmio",
+              "x-widget": "texto",
+              "x-ordem": 142
+            }
+          },
+          "required": [
+            "id",
+            "nome",
+            "foto",
+            "foto_alt",
+            "bio",
+            "unidades",
+            "unidades_rotulo",
+            "anos",
+            "anos_rotulo",
+            "premio",
+            "premio_de"
+          ]
+        },
+        "outros": {
+          "type": "array",
+          "title": "Outros palestrantes",
+          "x-widget": "lista",
+          "x-ordem": 144,
+          "items": {
+            "type": "object",
+            "title": "Palestrante",
+            "x-ordem": 121,
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$",
+                "title": "Código",
+                "description": "Minúsculas, sem espaço (ex.: nezio).",
+                "x-widget": "texto",
+                "x-ordem": 112
+              },
+              "nome": {
+                "type": "string",
+                "title": "Nome",
+                "x-widget": "texto",
+                "x-ordem": 113
+              },
+              "foto": {
+                "type": "string",
+                "title": "Retrato",
+                "x-widget": "imagem",
+                "x-ordem": 114,
+                "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+                "minLength": 1,
+                "pattern": "^(midia:|assets/)"
+              },
+              "foto_alt": {
+                "type": "string",
+                "title": "Descrição da foto",
+                "x-widget": "texto-longo",
+                "x-ordem": 115
+              },
+              "bio": {
+                "type": "string",
+                "title": "Descrição",
+                "x-widget": "texto-longo",
+                "x-ordem": 116
+              },
+              "fatos": {
+                "type": "array",
+                "title": "Números",
+                "x-widget": "lista",
+                "x-ordem": 120,
+                "items": {
+                  "type": "object",
+                  "title": "Número",
+                  "x-ordem": 119,
+                  "additionalProperties": false,
+                  "properties": {
+                    "numero": {
+                      "type": "string",
+                      "title": "Número",
+                      "x-widget": "texto",
+                      "x-ordem": 117,
+                      "description": "Ex.: 20.000+."
+                    },
+                    "texto": {
+                      "type": "string",
+                      "title": "O que conta",
+                      "x-widget": "texto",
+                      "x-ordem": 118
+                    }
+                  },
+                  "required": [
+                    "numero",
+                    "texto"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "nome",
+              "foto",
+              "foto_alt",
+              "bio",
+              "fatos"
+            ]
+          }
+        },
+        "convidados": {
+          "type": "object",
+          "title": "Convidados",
+          "x-ordem": 148,
+          "additionalProperties": false,
+          "properties": {
+            "quantidade": {
+              "type": "integer",
+              "title": "Quantos convidados",
+              "x-ordem": 145,
+              "x-widget": "texto",
+              "description": "Aparece como +8.",
+              "minimum": 0
+            },
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 146,
+              "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+            },
+            "texto": {
+              "type": "string",
+              "title": "Texto",
+              "x-widget": "texto-longo",
+              "x-ordem": 147
+            }
+          },
+          "required": [
+            "quantidade",
+            "titulo",
+            "texto"
+          ]
+        }
+      },
+      "required": [
+        "hero",
+        "principal",
+        "outros",
+        "convidados"
+      ],
+      "x-grupo": "Palestrantes"
+    },
+    "textos": {
+      "type": "object",
+      "title": "Fotos e textos",
+      "x-ordem": 241,
+      "additionalProperties": false,
+      "properties": {
+        "seo": {
+          "type": "object",
+          "title": "Google e WhatsApp",
+          "x-ordem": 154,
+          "additionalProperties": false,
+          "properties": {
+            "titulo": {
+              "type": "string",
+              "title": "Título da página",
+              "x-widget": "texto",
+              "x-ordem": 150,
+              "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+            },
+            "descricao": {
+              "type": "string",
+              "title": "Descrição",
+              "x-widget": "texto-longo",
+              "x-ordem": 151,
+              "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+            },
+            "imagem": {
+              "type": "string",
+              "title": "Imagem de compartilhamento",
+              "x-widget": "imagem",
+              "x-ordem": 152,
+              "description": "JPG 1200×630 com a data da edição. Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+              "minLength": 1,
+              "pattern": "^(midia:|assets/)"
+            },
+            "imagem_alt": {
+              "type": "string",
+              "title": "Descrição da imagem de compartilhamento",
+              "x-widget": "texto-longo",
+              "x-ordem": 153,
+              "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+            }
+          },
+          "required": [
+            "titulo",
+            "descricao",
+            "imagem",
+            "imagem_alt"
+          ]
+        },
+        "hero": {
+          "type": "object",
+          "title": "Topo",
+          "x-ordem": 160,
+          "additionalProperties": false,
+          "properties": {
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto-longo",
+              "x-ordem": 155
+            },
+            "apoio": {
+              "type": "string",
+              "title": "Texto de apoio",
+              "x-widget": "texto-longo",
+              "x-ordem": 156
+            },
+            "aviso": {
+              "type": "string",
+              "title": "Aviso da imagem",
+              "x-widget": "texto",
+              "x-ordem": 157
+            },
+            "cena_nome": {
+              "type": "string",
+              "title": "Rótulo do resort (nome)",
+              "x-widget": "texto",
+              "x-ordem": 158
+            },
+            "cena_fato": {
+              "type": "string",
+              "title": "Rótulo do resort (texto)",
+              "x-widget": "texto",
+              "x-ordem": 159
+            }
+          },
+          "required": [
+            "titulo",
+            "apoio",
+            "aviso",
+            "cena_nome",
+            "cena_fato"
+          ]
+        },
+        "oque": {
+          "type": "object",
+          "title": "O Clube",
+          "x-ordem": 196,
+          "additionalProperties": false,
+          "properties": {
+            "selo": {
+              "type": "string",
+              "title": "Selo",
+              "x-widget": "texto",
+              "x-ordem": 161
+            },
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 162
+            },
+            "lede": {
+              "type": "string",
+              "title": "Texto de abertura",
+              "x-widget": "texto-longo",
+              "x-ordem": 163
+            },
+            "aprender": {
+              "type": "object",
+              "title": "Quadro Aprender",
+              "x-ordem": 172,
+              "additionalProperties": false,
+              "properties": {
+                "foto": {
+                  "type": "string",
+                  "title": "Foto",
+                  "x-widget": "imagem",
+                  "x-ordem": 164,
+                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+                  "minLength": 1,
+                  "pattern": "^(midia:|assets/)"
+                },
+                "foto_alt": {
+                  "type": "string",
+                  "title": "Descrição da foto",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 165
+                },
+                "fonte": {
+                  "type": "string",
+                  "title": "Legenda",
+                  "x-widget": "texto",
+                  "x-ordem": 166,
+                  "description": "Ex.: Edição anterior."
+                },
+                "dia": {
+                  "type": "string",
+                  "title": "Dia",
+                  "x-widget": "texto",
+                  "x-ordem": 167,
+                  "description": "Ex.: Dia 1."
+                },
+                "quando": {
+                  "type": "string",
+                  "title": "Onde e quando",
+                  "x-widget": "texto",
+                  "x-ordem": 168,
+                  "description": "Ex.: Alphaville · 9h às 20h."
+                },
+                "verbo": {
+                  "type": "string",
+                  "title": "Título",
+                  "x-widget": "texto",
+                  "x-ordem": 169
+                },
+                "texto": {
+                  "type": "string",
+                  "title": "Texto",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 170,
+                  "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+                },
+                "link": {
+                  "type": "string",
+                  "title": "Texto do link",
+                  "x-widget": "texto",
+                  "x-ordem": 171
+                }
+              },
+              "required": [
+                "foto",
+                "foto_alt",
+                "fonte",
+                "dia",
+                "quando",
+                "verbo",
+                "texto",
+                "link"
+              ]
+            },
+            "negociar": {
+              "type": "object",
+              "title": "Quadro Negociar",
+              "x-ordem": 181,
+              "additionalProperties": false,
+              "properties": {
+                "foto": {
+                  "type": "string",
+                  "title": "Foto",
+                  "x-widget": "imagem",
+                  "x-ordem": 173,
+                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+                  "minLength": 1,
+                  "pattern": "^(midia:|assets/)"
+                },
+                "foto_alt": {
+                  "type": "string",
+                  "title": "Descrição da foto",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 174
+                },
+                "fonte": {
+                  "type": "string",
+                  "title": "Legenda",
+                  "x-widget": "texto",
+                  "x-ordem": 175,
+                  "description": "Ex.: Edição anterior."
+                },
+                "dia": {
+                  "type": "string",
+                  "title": "Dia",
+                  "x-widget": "texto",
+                  "x-ordem": 176,
+                  "description": "Ex.: Dia 1."
+                },
+                "quando": {
+                  "type": "string",
+                  "title": "Onde e quando",
+                  "x-widget": "texto",
+                  "x-ordem": 177,
+                  "description": "Ex.: Alphaville · 9h às 20h."
+                },
+                "verbo": {
+                  "type": "string",
+                  "title": "Título",
+                  "x-widget": "texto",
+                  "x-ordem": 178
+                },
+                "texto": {
+                  "type": "string",
+                  "title": "Texto",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 179,
+                  "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+                },
+                "link": {
+                  "type": "string",
+                  "title": "Texto do link",
+                  "x-widget": "texto",
+                  "x-ordem": 180
+                }
+              },
+              "required": [
+                "foto",
+                "foto_alt",
+                "fonte",
+                "dia",
+                "quando",
+                "verbo",
+                "texto",
+                "link"
+              ]
+            },
+            "resort": {
+              "type": "object",
+              "title": "Quadro Resort",
+              "x-ordem": 190,
+              "additionalProperties": false,
+              "properties": {
+                "foto": {
+                  "type": "string",
+                  "title": "Foto",
+                  "x-widget": "imagem",
+                  "x-ordem": 182,
+                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+                  "minLength": 1,
+                  "pattern": "^(midia:|assets/)"
+                },
+                "foto_alt": {
+                  "type": "string",
+                  "title": "Descrição da foto",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 183
+                },
+                "fonte": {
+                  "type": "string",
+                  "title": "Legenda",
+                  "x-widget": "texto",
+                  "x-ordem": 184,
+                  "description": "Ex.: Edição anterior."
+                },
+                "dia": {
+                  "type": "string",
+                  "title": "Dia",
+                  "x-widget": "texto",
+                  "x-ordem": 185,
+                  "description": "Ex.: Dia 1."
+                },
+                "quando": {
+                  "type": "string",
+                  "title": "Onde e quando",
+                  "x-widget": "texto",
+                  "x-ordem": 186,
+                  "description": "Ex.: Alphaville · 9h às 20h."
+                },
+                "verbo": {
+                  "type": "string",
+                  "title": "Título",
+                  "x-widget": "texto",
+                  "x-ordem": 187
+                },
+                "texto": {
+                  "type": "string",
+                  "title": "Texto",
+                  "x-widget": "texto-longo",
+                  "x-ordem": 188,
+                  "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+                },
+                "link": {
+                  "type": "string",
+                  "title": "Texto do link",
+                  "x-widget": "texto",
+                  "x-ordem": 189
+                }
+              },
+              "required": [
+                "foto",
+                "foto_alt",
+                "fonte",
+                "dia",
+                "quando",
+                "verbo",
+                "texto",
+                "link"
+              ]
+            },
+            "dois_dias": {
+              "type": "object",
+              "title": "Faixa Os dois dias",
+              "x-ordem": 195,
+              "additionalProperties": false,
+              "properties": {
+                "quando": {
+                  "type": "string",
+                  "title": "Selo",
+                  "x-widget": "texto",
+                  "x-ordem": 191
+                },
+                "frases": {
+                  "type": "array",
+                  "title": "Frases",
+                  "x-widget": "lista",
+                  "x-ordem": 193,
+                  "items": {
+                    "type": "string",
+                    "title": "Frase",
+                    "x-widget": "texto",
+                    "x-ordem": 192,
+                    "description": "Palavras entre *asteriscos* saem em itálico dourado."
+                  },
+                  "minItems": 1
+                },
+                "link": {
+                  "type": "string",
+                  "title": "Texto do link",
+                  "x-widget": "texto",
+                  "x-ordem": 194
+                }
+              },
+              "required": [
+                "quando",
+                "frases",
+                "link"
+              ]
+            }
+          },
+          "required": [
+            "selo",
+            "titulo",
+            "lede",
+            "aprender",
+            "negociar",
+            "resort",
+            "dois_dias"
+          ]
+        },
+        "mesa": {
+          "type": "object",
+          "title": "Para quem é",
+          "x-ordem": 200,
+          "additionalProperties": false,
+          "properties": {
+            "selo": {
+              "type": "string",
+              "title": "Selo",
+              "x-widget": "texto",
+              "x-ordem": 197
+            },
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto-longo",
+              "x-ordem": 198
+            },
+            "virada": {
+              "type": "string",
+              "title": "Frase final",
+              "x-widget": "texto-longo",
+              "x-ordem": 199,
+              "description": "Palavras entre *asteriscos* saem em itálico dourado."
+            }
+          },
+          "required": [
+            "selo",
+            "titulo",
+            "virada"
+          ]
+        },
+        "palestrantes_titulo": {
+          "type": "string",
+          "title": "Título da seção de palestrantes",
+          "x-widget": "texto",
+          "x-ordem": 201
+        },
+        "programa": {
+          "type": "object",
+          "title": "Programação",
+          "x-ordem": 205,
+          "additionalProperties": false,
+          "properties": {
+            "selo": {
+              "type": "string",
+              "title": "Selo",
+              "x-widget": "texto",
+              "x-ordem": 202
+            },
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 203,
+              "description": "Palavras entre *asteriscos* saem em itálico dourado."
+            },
+            "lede": {
+              "type": "string",
+              "title": "Texto de abertura",
+              "x-widget": "texto-longo",
+              "x-ordem": 204
+            }
+          },
+          "required": [
+            "selo",
+            "titulo",
+            "lede"
+          ]
+        },
+        "voo": {
+          "type": "object",
+          "title": "Voo até o resort",
+          "x-ordem": 208,
+          "additionalProperties": false,
+          "properties": {
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 206
+            },
+            "apoio": {
+              "type": "string",
+              "title": "Texto",
+              "x-widget": "texto-longo",
+              "x-ordem": 207,
+              "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
+            }
+          },
+          "required": [
+            "titulo",
+            "apoio"
+          ]
+        },
+        "edicao": {
+          "type": "object",
+          "title": "Edição anterior",
+          "x-ordem": 221,
+          "additionalProperties": false,
+          "properties": {
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 209,
+              "description": "Palavras entre *asteriscos* saem em itálico dourado."
+            },
+            "lede": {
+              "type": "string",
+              "title": "Texto de abertura",
+              "x-widget": "texto-longo",
+              "x-ordem": 210
+            },
+            "video": {
+              "type": "string",
+              "title": "Vídeo (tela grande)",
+              "x-widget": "video",
+              "x-ordem": 211,
+              "description": "Vídeo MP4 já no site (assets/…) ou enviado pelo admin (midia:…).",
+              "minLength": 1,
+              "pattern": "^(midia:|assets/)"
+            },
+            "video_curto": {
+              "type": "string",
+              "title": "Vídeo (celular, 360p)",
+              "x-widget": "video",
+              "x-ordem": 212,
+              "description": "Vídeo MP4 já no site (assets/…) ou enviado pelo admin (midia:…).",
+              "minLength": 1,
+              "pattern": "^(midia:|assets/)"
+            },
+            "video_capa": {
+              "type": "string",
+              "title": "Capa do vídeo",
+              "x-widget": "imagem",
+              "x-ordem": 213,
+              "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+              "minLength": 1,
+              "pattern": "^(midia:|assets/)"
+            },
+            "video_rotulo": {
+              "type": "string",
+              "title": "Descrição do vídeo",
+              "x-widget": "texto",
+              "x-ordem": 214
+            },
+            "video_legenda": {
+              "type": "string",
+              "title": "Legenda do vídeo",
+              "x-widget": "texto",
+              "x-ordem": 215
+            },
+            "youtube": {
+              "type": "string",
+              "title": "Link do YouTube",
+              "x-widget": "texto",
+              "x-ordem": 216,
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "fotos": {
+              "type": "array",
+              "title": "Fotos",
+              "x-widget": "lista",
+              "x-ordem": 220,
+              "items": {
+                "type": "object",
+                "title": "Foto",
+                "x-ordem": 219,
+                "additionalProperties": false,
+                "properties": {
+                  "foto": {
+                    "type": "string",
+                    "title": "Foto",
+                    "x-widget": "imagem",
+                    "x-ordem": 217,
+                    "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
+                    "minLength": 1,
+                    "pattern": "^(midia:|assets/)"
+                  },
+                  "alt": {
+                    "type": "string",
+                    "title": "Descrição da foto",
+                    "x-widget": "texto-longo",
+                    "x-ordem": 218
+                  }
+                },
+                "required": [
+                  "foto",
+                  "alt"
+                ]
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "titulo",
+            "lede",
+            "video",
+            "video_curto",
+            "video_capa",
+            "video_rotulo",
+            "video_legenda",
+            "youtube",
+            "fotos"
+          ]
+        },
+        "manifesto": {
+          "type": "object",
+          "title": "Manifesto",
+          "x-ordem": 227,
+          "additionalProperties": false,
+          "properties": {
+            "antes": {
+              "type": "string",
+              "title": "Frase de abertura",
+              "x-widget": "texto",
+              "x-ordem": 222
+            },
+            "nao": {
+              "type": "array",
+              "title": "O que o Clube não é",
+              "x-widget": "lista",
+              "x-ordem": 224,
+              "items": {
+                "type": "string",
+                "title": "Frase",
+                "x-widget": "texto",
+                "x-ordem": 223
+              },
+              "minItems": 1
+            },
+            "frase": {
+              "type": "string",
+              "title": "Frase principal",
+              "x-widget": "texto",
+              "x-ordem": 225,
+              "description": "Palavras entre *asteriscos* saem em itálico dourado."
+            },
+            "apoio": {
+              "type": "string",
+              "title": "Texto de apoio",
+              "x-widget": "texto-longo",
+              "x-ordem": 226
+            }
+          },
+          "required": [
+            "antes",
+            "nao",
+            "frase",
+            "apoio"
+          ]
+        },
+        "ingressos": {
+          "type": "object",
+          "title": "Ingressos (textos)",
+          "x-ordem": 232,
+          "additionalProperties": false,
+          "properties": {
+            "selo": {
+              "type": "string",
+              "title": "Selo",
+              "x-widget": "texto",
+              "x-ordem": 228
+            },
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 229
+            },
+            "lede": {
+              "type": "string",
+              "title": "Texto de abertura",
+              "x-widget": "texto-longo",
+              "x-ordem": 230
+            },
+            "nota": {
+              "type": "string",
+              "title": "Nota sob o botão",
+              "x-widget": "texto-longo",
+              "x-ordem": 231
+            }
+          },
+          "required": [
+            "selo",
+            "titulo",
+            "lede",
+            "nota"
+          ]
+        },
+        "local": {
+          "type": "object",
+          "title": "Como chegar",
+          "x-ordem": 236,
+          "additionalProperties": false,
+          "properties": {
+            "selo": {
+              "type": "string",
+              "title": "Selo",
+              "x-widget": "texto",
+              "x-ordem": 233
+            },
+            "titulo": {
+              "type": "string",
+              "title": "Título",
+              "x-widget": "texto",
+              "x-ordem": 234,
+              "description": "Palavras entre *asteriscos* saem em itálico dourado."
+            },
+            "lede": {
+              "type": "string",
+              "title": "Texto de abertura",
+              "x-widget": "texto-longo",
+              "x-ordem": 235
+            }
+          },
+          "required": [
+            "selo",
+            "titulo",
+            "lede"
+          ]
+        },
+        "convite": {
+          "type": "object",
+          "title": "Fechamento",
+          "x-ordem": 240,
+          "additionalProperties": false,
+          "properties": {
+            "antes": {
+              "type": "string",
+              "title": "Frase de abertura",
+              "x-widget": "texto-longo",
+              "x-ordem": 237
+            },
+            "frases": {
+              "type": "array",
+              "title": "Frases do título",
+              "x-widget": "lista",
+              "x-ordem": 239,
+              "items": {
+                "type": "string",
+                "title": "Frase",
+                "x-widget": "texto",
+                "x-ordem": 238,
+                "description": "Palavras entre *asteriscos* saem em itálico dourado."
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "antes",
+            "frases"
+          ]
+        }
+      },
+      "required": [
+        "seo",
+        "hero",
+        "oque",
+        "mesa",
+        "palestrantes_titulo",
+        "programa",
+        "voo",
+        "edicao",
+        "manifesto",
+        "ingressos",
+        "local",
+        "convite"
+      ],
+      "x-grupo": "Fotos e textos"
+    }
+  }
+}

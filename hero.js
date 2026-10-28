@@ -26,7 +26,11 @@
   var rotuloFato = hero.querySelector(".foco__fato");
   var dica = hero.querySelector(".hero__dica");
 
-  var CENA = { nome: "Dia 2 · Resort das Oliveiras", fato: "Porto Feliz. Render do projeto." };
+  // textos da edição (tools/gerar.py grava no <script id="dados-edicao">); sem o bloco, valem os de 2026
+  var DADOS = (function () {
+    try { return JSON.parse(document.getElementById("dados-edicao").textContent) || {}; } catch (e) { return {}; }
+  })();
+  var CENA = DADOS.cena || { nome: "Dia 2 · Resort das Oliveiras", fato: "Porto Feliz. Render do projeto." };
   var ORDEM = ["pablo", "nezio", "enio"]; // de trás para a frente, como no desenho
   var ordemToque = ["enio", "nezio", "pablo"]; // quem está na frente vem primeiro no teste de toque
 
@@ -973,13 +977,14 @@
     veu.className = "abertura";
     veu.setAttribute("aria-hidden", "true");
     veu.innerHTML = '<div class="abertura__veu"></div><div class="abertura__marca"></div>' +
-      '<div class="abertura__fio"></div><p class="abertura__data">24 · 25 nov 2026</p>';
+      '<div class="abertura__fio"></div><p class="abertura__data"></p>';
     hero.appendChild(veu);
     hero.classList.add("sem-veu");
     var veuFundo = veu.querySelector(".abertura__veu");
     var marca = veu.querySelector(".abertura__marca");
     var fio = veu.querySelector(".abertura__fio");
     var data = veu.querySelector(".abertura__data");
+    data.textContent = DADOS.abertura || "24 · 25 nov 2026";
     marca.style.webkitMaskImage = mascara;
     marca.style.maskImage = mascara;
     var x0 = (vw - largura) / 2, y0 = (vh - altura) / 2 - Math.min(40, vh * 0.04);

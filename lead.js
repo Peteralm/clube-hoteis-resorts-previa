@@ -11,6 +11,7 @@
   // endereço que recebe o lead (POST com JSON), no atributo data-webhook do pop-up no index.html.
   // Vazio: o lead não é enviado e só o WhatsApp abre
   var WEBHOOK = dialogo.getAttribute("data-webhook") || "";
+  var RESERVA = dialogo.getAttribute("data-webhook-reserva") || "";
 
   var form = dialogo.querySelector(".acesso__form");
   var campoNome = form.elements.nome;
@@ -396,9 +397,15 @@
     // o Clint lê os campos pelo nome exato, com maiúsculas: Nome, Email, telefone (+DDI e número: sem o +, o Clint põe +55 na frente de tudo) e as UTMs
     var corpo = { Nome: lead.nome_completo, Email: lead.email, telefone: "+" + lead.telefone_e164.replace(/\D/g, "") };
     for (var k in lead.utm) corpo[k] = lead.utm[k];
-    // o webhook do Clint não libera chamadas de outros sites (CORS): vai como envio simples, que o navegador não bloqueia,
-    // mas cuja resposta não pode ser lida. A confirmação aparece quando o envio chega ao servidor; falha de rede mostra o erro
-    return fetch(WEBHOOK, { method: "POST", mode: "no-cors", keepalive: true, headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: JSON.stringify(corpo) });
+    var json = JSON.stringify(corpo);
+    // o lead passa pela função "lead" do Supabase, que repassa ao Clint e devolve a resposta real dele: erro do Clint vira a
+    // tela de falha (com "Tentar de novo") em vez de uma confirmação falsa. Se a função nem responder (rede, fora do ar),
+    // vai direto ao Clint como envio simples, sem CORS, cuja resposta não pode ser lida
+    return fetch(WEBHOOK, { method: "POST", keepalive: true, headers: { "Content-Type": "application/json" }, body: json })
+      .then(function (r) { if (!r.ok) throw new Error("lead respondeu " + r.status); }, function (erro) {
+        if (!RESERVA) throw erro;
+        return fetch(RESERVA, { method: "POST", mode: "no-cors", keepalive: true, headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: json });
+      });
   }
   function mandar() {
     if (enviando) return;

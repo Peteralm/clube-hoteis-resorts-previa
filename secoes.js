@@ -13,6 +13,10 @@
   function largo() { return window.matchMedia(LARGO).matches; }
   function limita(v, a, b) { return Math.max(a, Math.min(b, v)); }
   var NS = "http://www.w3.org/2000/svg";
+  // textos da edição (tools/gerar.py grava no <script id="dados-edicao">); sem o bloco, valem os de 2026
+  var DADOS = (function () {
+    try { return JSON.parse(document.getElementById("dados-edicao").textContent) || {}; } catch (e) { return {}; }
+  })();
 
   // ------------------------------------------------------------ sequência de quadros (obra e voo)
   // Rede: no máximo REDE pedidos ao mesmo tempo, na ordem de prioridade dada; foco(i) passa à frente da fila os
@@ -477,7 +481,7 @@
 
   // régua dos 25 anos: um traço por ano, o de cada cinco mais alto e em ouro
   document.querySelectorAll(".regua").forEach(function (el) {
-    var anos = 25, svg = '<svg viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true"><path class="regua__base" d="M0 29.5 H1000"/>';
+    var anos = DADOS.anos || 25, svg = '<svg viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true"><path class="regua__base" d="M0 29.5 H1000"/>';
     for (var i = 0; i <= anos; i++) {
       var x = Math.min(999.5, Math.max(0.5, i * 1000 / anos));
       var alto = i % 5 === 0;
@@ -493,8 +497,8 @@
   var unidades = document.querySelector(".unidades");
   if (unidades) {
     var uctx = unidades.getContext("2d");
-    var TOTAL = 6000;
     var contador = document.querySelector("[data-contar]");
+    var TOTAL = (contador && +contador.dataset.contar) || 6000;
     var feito = anima ? 0 : 1;
     // cada unidade acende numa ordem fixa sorteada, como um bairro inteiro sendo entregue
     var quando = new Float32Array(TOTAL), tom = new Uint8Array(TOTAL);
@@ -532,7 +536,7 @@
       if (!w) return;
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       // blocos de 10 x 10: 15 x 4 blocos no largo, 10 x 6 no estreito
-      var bx = w < 520 ? 10 : 15, by = TOTAL / 100 / bx;
+      var bx = w < 520 ? 10 : 15, by = Math.ceil(TOTAL / 100 / bx);
       var vao = w < 520 ? 4 : 6, g = 0.6;
       var cw = (w - (bx - 1) * vao - bx * 9 * g) / (bx * 10);
       grade = { bx: bx, by: by, vao: vao, g: g, cw: cw };
@@ -844,6 +848,7 @@
   // baixo) e, nas que só o Premium abre, o cadeado com o nome do ingresso que abre
   var planta = document.querySelector(".acessos");
   var chavesIng = document.querySelector(".ingressos .chaves");
+  var INGRESSOS = DADOS.ingressos || [{ id: "premium", nome: "Premium" }, { id: "vip", nome: "VIP" }];
   if (planta && chavesIng) {
     planta.querySelectorAll(".sala").forEach(function (g) {
       var r = g.querySelector("rect");
@@ -862,13 +867,15 @@
       g.appendChild(el("path", { "class": "porta__vao", d: "M" + px + " " + yb + " H" + (px + L) }));
       g.appendChild(el("path", { "class": "porta__folha", d: "M" + px + " " + yb + " V" + (yb - L) }));
       g.appendChild(el("path", { "class": "porta__arco", d: "M" + px + " " + (yb - L) + " A" + L + " " + L + " 0 0 1 " + (px + L) + " " + yb }));
-      if (!g.hasAttribute("data-vip")) {
+      // o cadeado vai nas salas que nem todo ingresso abre, com o nome do primeiro ingresso que abre
+      var donos = INGRESSOS.filter(function (x) { return g.hasAttribute("data-" + x.id); });
+      if (donos.length && donos.length < INGRESSOS.length) {
         // o cadeado no canto de baixo à esquerda, longe do nome da sala e da porta
         var c = el("g", { "class": "sala__cadeado", transform: "translate(" + (x + 16) + " " + (yb - 30) + ")" });
         c.appendChild(el("path", { d: "M2.5 7 V4.5 a3.5 3.5 0 0 1 7 0 V7" }));
         c.appendChild(el("rect", { x: 0.5, y: 7, width: 11, height: 8.5, rx: 1.5 }));
         var tx = el("text", { x: 17, y: 14 });
-        tx.textContent = "PREMIUM";
+        tx.textContent = donos[0].nome.toUpperCase();
         c.appendChild(tx);
         g.appendChild(c);
       }
@@ -900,7 +907,14 @@
     var troca = document.createElement("div");
     troca.className = "troca-ingresso";
     troca.setAttribute("aria-hidden", "true");
-    troca.innerHTML = '<button type="button" data-ir="premium" tabindex="-1">Premium</button><button type="button" data-ir="vip" tabindex="-1">VIP</button>';
+    INGRESSOS.forEach(function (x) {
+      var bt = document.createElement("button");
+      bt.type = "button";
+      bt.setAttribute("data-ir", x.id);
+      bt.tabIndex = -1;
+      bt.textContent = x.nome;
+      troca.appendChild(bt);
+    });
     document.body.appendChild(troca);
     var botoesTroca = Array.prototype.slice.call(troca.querySelectorAll("button"));
     function marcarTroca() {

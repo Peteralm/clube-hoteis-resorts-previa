@@ -42,9 +42,9 @@
   <link rel="preload" as="fetch" href="assets/cena/mobile-mascara.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (not ((min-width: 900px) and (min-aspect-ratio: 1/1)))">
   <link rel="preload" as="fetch" href="assets/cena/desktop-prof.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-aspect-ratio: 1/1)">
   <link rel="preload" as="fetch" href="assets/cena/desktop-mascara.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-aspect-ratio: 1/1)">
-  <link rel="stylesheet" href="novo.css?v=261028b">
-  <link rel="stylesheet" href="secoes.css?v=261028b">
-  <link rel="stylesheet" href="lead.css?v=261028b">
+  <link rel="stylesheet" href="novo.css?v=261028c">
+  <link rel="stylesheet" href="secoes.css?v=261028c">
+  <link rel="stylesheet" href="lead.css?v=261028c">
   <script>document.documentElement.classList.replace("no-js", "js");</script>
   <script type="application/ld+json">
   {
@@ -86,6 +86,8 @@
     ]
   }
   </script>
+  <!-- textos da edição que o hero.js e o secoes.js montam (gerado por tools/gerar.py; sem ele, o JS usa os da edição de 2026) -->
+  <script id="dados-edicao" type="application/json">{"abertura":"24 · 25 nov 2026","cena":{"nome":"Dia 2 · Resort das Oliveiras","fato":"Porto Feliz. Render do projeto."},"ingressos":[{"id":"premium","nome":"Premium"},{"id":"vip","nome":"VIP"}],"anos":25}</script>
 </head>
 <body>
   <a class="pular" href="#hero-titulo">Pular para o conteúdo</a>
@@ -673,7 +675,7 @@
   </div>
 
   <!-- o pop-up de acesso: lead.js abre este cadastro em todo botão "Garantir meu acesso" -->
-  <dialog class="acesso" id="acesso" aria-labelledby="acesso-titulo" data-webhook="https://functions-api.clint.digital/endpoints/integration/webhook/9628c695-8574-493a-9be7-1a1f0513d142">
+  <dialog class="acesso" id="acesso" aria-labelledby="acesso-titulo" data-webhook="https://xfylbdxeciujemyavbaq.supabase.co/functions/v1/lead" data-webhook-reserva="https://functions-api.clint.digital/endpoints/integration/webhook/9628c695-8574-493a-9be7-1a1f0513d142">
     <div class="acesso__painel">
       <button class="acesso__fechar" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
 
@@ -739,8 +741,8 @@
   <!-- o GSAP antes do hero: a cortina de abertura usa a mesma biblioteca das seções -->
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
-  <script src="hero.js?v=261028b" defer></script>
-  <script src="secoes.js?v=261028b" defer></script>
-  <script src="lead.js?v=261028b" defer></script>
+  <script src="hero.js?v=261028c" defer></script>
+  <script src="secoes.js?v=261028c" defer></script>
+  <script src="lead.js?v=261028c" defer></script>
 </body>
 </html>
