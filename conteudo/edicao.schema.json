@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "edicao.schema.json",
   "title": "Edição do Clube de Negócios Hotéis & Resorts",
-  "description": "Dados de uma edição da landing page. tools/gerar.py valida contra este schema e gera site/novo/index.html.",
-  "x-versao-schema": 1,
+  "description": "Dados de uma edição da landing page (formato v2). site/novo/render/renderizar.mjs valida contra este schema e gera a página (no build: tools/render/gerar.mjs -> site/novo/index.html).",
+  "x-versao-schema": 2,
   "x-grupos": [
     "Datas e locais",
     "Ingressos",
@@ -19,12 +19,207 @@
     "palestrantes",
     "textos"
   ],
+  "$defs": {
+    "imagem": {
+      "type": "object",
+      "title": "Imagem",
+      "x-widget": "imagem",
+      "additionalProperties": false,
+      "description": "Imagem já no site (src assets/…) ou enviada pelo admin (src midia:<edição>/<nome>, com as variantes <nome>-<largura>.webp no bucket).",
+      "required": [
+        "src",
+        "w",
+        "h",
+        "larguras"
+      ],
+      "properties": {
+        "src": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(midia:|assets/)",
+          "title": "Arquivo"
+        },
+        "w": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Largura (px)",
+          "description": "local: do arquivo src; midia: da maior variante."
+        },
+        "h": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Altura (px)"
+        },
+        "larguras": {
+          "type": "array",
+          "title": "Variantes",
+          "description": "Larguras das variantes <base>-<N>.webp que existem (local) ou foram enviadas (midia).",
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "foco": {
+          "type": "array",
+          "title": "Ponto de foco",
+          "description": "x e y em % (0–100): o ponto que fica visível quando a foto é recortada.",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "codigos": {
+      "type": "array",
+      "title": "Ingressos que abrem",
+      "x-widget": "escolha",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*$",
+        "title": "Código do ingresso"
+      }
+    },
+    "planta": {
+      "type": "object",
+      "title": "Planta de acessos",
+      "x-widget": "planta",
+      "additionalProperties": false,
+      "description": "Grade colunas x linhas (desenho do computador; o celular usa a mesma grade transposta). Salas não se sobrepõem.",
+      "required": [
+        "colunas",
+        "linhas",
+        "salas"
+      ],
+      "properties": {
+        "colunas": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 40,
+          "title": "Colunas da grade"
+        },
+        "linhas": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 40,
+          "title": "Linhas da grade"
+        },
+        "salas": {
+          "type": "array",
+          "title": "Salas",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "title": "Sala",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "nome",
+              "detalhe",
+              "tipo",
+              "x",
+              "y",
+              "w",
+              "h",
+              "abre",
+              "zonas"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*$",
+                "title": "Código da sala"
+              },
+              "nome": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Nome na planta",
+                "description": "Quebra sozinho pela largura da sala; Enter força uma quebra."
+              },
+              "detalhe": {
+                "type": "string",
+                "title": "Subtítulo (opcional)",
+                "description": "Enter separa linhas."
+              },
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "sala",
+                  "externa",
+                  "online"
+                ],
+                "title": "Tipo",
+                "description": "sala: paredes, porta e cadeado; externa e online: contorno tracejado."
+              },
+              "x": {
+                "type": "integer",
+                "minimum": 0,
+                "title": "Coluna"
+              },
+              "y": {
+                "type": "integer",
+                "minimum": 0,
+                "title": "Linha"
+              },
+              "w": {
+                "type": "integer",
+                "minimum": 1,
+                "title": "Largura (colunas)"
+              },
+              "h": {
+                "type": "integer",
+                "minimum": 1,
+                "title": "Altura (linhas)"
+              },
+              "abre": {
+                "$ref": "#/$defs/codigos"
+              },
+              "zonas": {
+                "type": "array",
+                "title": "Zonas (faixas dentro da sala)",
+                "items": {
+                  "type": "object",
+                  "title": "Zona",
+                  "additionalProperties": false,
+                  "required": [
+                    "id",
+                    "nome",
+                    "abre"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_-]*$",
+                      "title": "Código da zona"
+                    },
+                    "nome": {
+                      "type": "string",
+                      "minLength": 1,
+                      "title": "Nome da zona"
+                    },
+                    "abre": {
+                      "$ref": "#/$defs/codigos"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "properties": {
     "$schema": {
       "type": "string"
     },
     "versao": {
-      "const": 1,
+      "const": 2,
       "title": "Versão do formato",
       "x-widget": "texto",
       "readOnly": true,
@@ -138,13 +333,11 @@
                 "description": "Ex.: -46.856813."
               },
               "foto": {
-                "type": "string",
+                "$ref": "#/$defs/imagem",
                 "title": "Foto do dia",
                 "x-widget": "imagem",
                 "x-ordem": 12,
-                "description": "Aparece na programação. Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-                "minLength": 1,
-                "pattern": "^(midia:|assets/)"
+                "description": "Aparece na programação. Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
               },
               "foto_alt": {
                 "type": "string",
@@ -502,534 +695,15 @@
           "description": "O primeiro aparece selecionado.",
           "minItems": 1
         },
-        "salas": {
-          "type": "object",
-          "title": "Salas da planta",
-          "x-ordem": 110,
-          "additionalProperties": false,
-          "properties": {
-            "auditorio": {
-              "type": "object",
-              "title": "Auditório",
-              "x-ordem": 61,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 56,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 57,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 58,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 59,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 60,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "area_vip": {
-              "type": "object",
-              "title": "Área VIP",
-              "x-ordem": 67,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 62,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 63,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 64,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 65,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 66,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "assento": {
-              "type": "object",
-              "title": "Assento Premium",
-              "x-ordem": 73,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 68,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 69,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 70,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 71,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 72,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "lounge": {
-              "type": "object",
-              "title": "Lounge VIP",
-              "x-ordem": 79,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 74,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 75,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 76,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 77,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 78,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "camarim": {
-              "type": "object",
-              "title": "Camarim e bastidores",
-              "x-ordem": 85,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 80,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 81,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 82,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 83,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 84,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "almoco": {
-              "type": "object",
-              "title": "Almoço",
-              "x-ordem": 91,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 86,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 87,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 88,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 89,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 90,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "consultoria": {
-              "type": "object",
-              "title": "Consultoria estratégica",
-              "x-ordem": 97,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 92,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 93,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 94,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 95,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 96,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "online": {
-              "type": "object",
-              "title": "Online, pós-evento",
-              "x-ordem": 103,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 98,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 99,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 100,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 101,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 102,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            },
-            "resort": {
-              "type": "object",
-              "title": "Resort",
-              "x-ordem": 109,
-              "additionalProperties": false,
-              "properties": {
-                "nome": {
-                  "type": "string",
-                  "title": "Nome na planta",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 104,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "detalhe": {
-                  "type": "string",
-                  "title": "Subtítulo na planta (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 105,
-                  "description": "Uma linha por linha do desenho."
-                },
-                "nome_celular": {
-                  "type": "string",
-                  "title": "Nome na planta do celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 106,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "detalhe_celular": {
-                  "type": "string",
-                  "title": "Subtítulo no celular (opcional)",
-                  "x-widget": "texto-longo",
-                  "x-ordem": 107,
-                  "description": "Vazio = igual ao de cima."
-                },
-                "abre": {
-                  "type": "array",
-                  "title": "Ingressos que abrem esta sala",
-                  "x-widget": "escolha",
-                  "x-ordem": 108,
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]*$",
-                    "title": "Código do ingresso"
-                  },
-                  "description": "Códigos dos ingressos (ex.: premium, vip).",
-                  "uniqueItems": true
-                }
-              },
-              "required": [
-                "nome",
-                "detalhe",
-                "nome_celular",
-                "detalhe_celular",
-                "abre"
-              ]
-            }
-          },
-          "required": [
-            "auditorio",
-            "area_vip",
-            "assento",
-            "lounge",
-            "camarim",
-            "almoco",
-            "consultoria",
-            "online",
-            "resort"
-          ],
-          "description": "As salas e o desenho são fixos; aqui muda o nome e quais ingressos abrem cada uma."
+        "planta": {
+          "$ref": "#/$defs/planta",
+          "title": "Planta de acessos",
+          "x-ordem": 110
         }
       },
       "required": [
         "lista",
-        "salas"
+        "planta"
       ],
       "x-grupo": "Ingressos"
     },
@@ -1148,13 +822,11 @@
               "x-ordem": 133
             },
             "foto": {
-              "type": "string",
+              "$ref": "#/$defs/imagem",
               "title": "Retrato",
               "x-widget": "imagem",
               "x-ordem": 134,
-              "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-              "minLength": 1,
-              "pattern": "^(midia:|assets/)"
+              "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
             },
             "foto_alt": {
               "type": "string",
@@ -1251,13 +923,11 @@
                 "x-ordem": 113
               },
               "foto": {
-                "type": "string",
+                "$ref": "#/$defs/imagem",
                 "title": "Retrato",
                 "x-widget": "imagem",
                 "x-ordem": 114,
-                "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-                "minLength": 1,
-                "pattern": "^(midia:|assets/)"
+                "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
               },
               "foto_alt": {
                 "type": "string",
@@ -1383,13 +1053,11 @@
               "description": "Pode usar {datas} (24 e 25 de novembro de 2026), {datas_sem_ano} (24 e 25 de novembro), {datas_curtas} (24–25 nov 2026), {ano}, {dia1} e {dia2} (terça, 24 de novembro), {convidados} (o número de convidados): o site troca pelo valor da edição."
             },
             "imagem": {
-              "type": "string",
+              "$ref": "#/$defs/imagem",
               "title": "Imagem de compartilhamento",
               "x-widget": "imagem",
               "x-ordem": 152,
-              "description": "JPG 1200×630 com a data da edição. Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-              "minLength": 1,
-              "pattern": "^(midia:|assets/)"
+              "description": "JPG 1200×630 com a data da edição. Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
             },
             "imagem_alt": {
               "type": "string",
@@ -1482,13 +1150,11 @@
               "additionalProperties": false,
               "properties": {
                 "foto": {
-                  "type": "string",
+                  "$ref": "#/$defs/imagem",
                   "title": "Foto",
                   "x-widget": "imagem",
                   "x-ordem": 164,
-                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-                  "minLength": 1,
-                  "pattern": "^(midia:|assets/)"
+                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
                 },
                 "foto_alt": {
                   "type": "string",
@@ -1555,13 +1221,11 @@
               "additionalProperties": false,
               "properties": {
                 "foto": {
-                  "type": "string",
+                  "$ref": "#/$defs/imagem",
                   "title": "Foto",
                   "x-widget": "imagem",
                   "x-ordem": 173,
-                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-                  "minLength": 1,
-                  "pattern": "^(midia:|assets/)"
+                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
                 },
                 "foto_alt": {
                   "type": "string",
@@ -1628,13 +1292,11 @@
               "additionalProperties": false,
               "properties": {
                 "foto": {
-                  "type": "string",
+                  "$ref": "#/$defs/imagem",
                   "title": "Foto",
                   "x-widget": "imagem",
                   "x-ordem": 182,
-                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-                  "minLength": 1,
-                  "pattern": "^(midia:|assets/)"
+                  "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
                 },
                 "foto_alt": {
                   "type": "string",
@@ -1877,13 +1539,11 @@
               "pattern": "^(midia:|assets/)"
             },
             "video_capa": {
-              "type": "string",
+              "$ref": "#/$defs/imagem",
               "title": "Capa do vídeo",
               "x-widget": "imagem",
               "x-ordem": 213,
-              "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-              "minLength": 1,
-              "pattern": "^(midia:|assets/)"
+              "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
             },
             "video_rotulo": {
               "type": "string",
@@ -1917,13 +1577,11 @@
                 "additionalProperties": false,
                 "properties": {
                   "foto": {
-                    "type": "string",
+                    "$ref": "#/$defs/imagem",
                     "title": "Foto",
                     "x-widget": "imagem",
                     "x-ordem": 217,
-                    "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…).",
-                    "minLength": 1,
-                    "pattern": "^(midia:|assets/)"
+                    "description": "Imagem já no site (assets/…) ou enviada pelo admin (midia:…)."
                   },
                   "alt": {
                     "type": "string",

@@ -1,0 +1,642 @@
+{#- Modelo da landing page (Nunjucks). renderizar.mjs + conteudo/edicao.json -> index.html (tools/render/gerar.mjs).
+    Não edite index.html à mão: edite este modelo (estrutura, classes, animação) ou o JSON (textos, datas, fotos).
+    Variáveis: d = dados com HTML escapado; cru = dados puros; dias = os dias com as datas já calculadas;
+    img(valor, larguras, src) / video(valor) resolvem caminhos locais e "midia:". Filtros: enfase (*x* -> <em>x</em>),
+    sem_enfase, linhas (quebra por linha). Marcadores do editor: campo(caminho), campo_img(caminho), lista(caminho),
+    item(i), painel(nome) devolvem "" fora do modo edição. Atenção (Nunjucks != Jinja): lista vazia é verdadeira em
+    if (use |length) e não há índice negativo (use |last). -#}
+{%- set t = d.textos -%}
+{%- set pal = d.palestrantes -%}
+{%- set ing = d.ingressos -%}
+{%- set whats = "https://wa.me/5511919259667?text=Ol%C3%A1%21%20Quero%20garantir%20meu%20acesso%20ao%20Clube%20de%20Neg%C3%B3cios%20de%20Hot%C3%A9is%20%26%20Resorts." -%}
+{%- set seta = '<span class="botao__seta" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' -%}
+{%- set desce = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 5v13m-5-5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' -%}
+{%- set pino = '<svg class="mapa__nome-icone" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>' -%}
+{#- retratos com recorte próprio em secoes.css (.retrato--<id>); outro código ganha um quadro genérico, com a foto
+    cobrindo o quadro e sem recorte -#}
+{%- set RECORTE = ["enio", "nezio", "pablo"] -%}
+{%- macro sem_recorte(id, proporcao) %}{% if id not in RECORTE %} style="aspect-ratio: {{ proporcao }}"{% endif %}{% endmacro -%}
+{%- macro foto_sem_recorte(id, foto) %}{% if id not in RECORTE %} style="inset: 0; width: 100%; height: 100%; object-fit: cover; transform: none{{ "; " ~ foco(foto) if foco(foto) else "" }}"{% else %}{{ estilo(foco(foto)) }}{% endif %}{% endmacro -%}
+{%- macro quadro(c, alvo, largura) -%}
+{%- set f = img(cru.textos.oque[c].foto, largura[0], largura[1]) -%}
+<div class="oque__foto"><img{{ campo_img("textos.oque." ~ c ~ ".foto") }} src="{{ f.src }}"{% if f.srcset %} srcset="{{ f.srcset }}" sizes="(min-width: 900px) 62vw, 100vw"{% endif %} alt="{{ t.oque[c].foto_alt }}" width="{{ f.w }}" height="{{ f.h }}"{{ estilo(foco(cru.textos.oque[c].foto)) }} loading="lazy" decoding="async"></div>
+{%- endmacro -%}
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{{ t.seo.titulo }}</title>
+  <meta name="description" content="{{ t.seo.descricao }}">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#ffffff">
+  <!-- DOMINIO-A-DEFINIR: trocar nas 6 ocorrências deste head (canonical, og:url, og:image, twitter:image, JSON-LD x2) e em robots.txt / sitemap.xml -->
+  <link rel="canonical" href="https://DOMINIO-A-DEFINIR/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Clube de Negócios Hotéis &amp; Resorts">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:url" content="https://DOMINIO-A-DEFINIR/">
+  <meta property="og:title" content="{{ t.seo.titulo }}">
+  <meta property="og:description" content="{{ t.seo.descricao }}">
+  <meta property="og:image" content="https://DOMINIO-A-DEFINIR/{{ seo_imagem }}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ t.seo.imagem_alt }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ t.seo.titulo }}">
+  <meta name="twitter:description" content="{{ t.seo.descricao }}">
+  <meta name="twitter:image" content="https://DOMINIO-A-DEFINIR/{{ seo_imagem }}">
+  <meta name="twitter:image:alt" content="{{ t.seo.imagem_alt }}">
+
+  <link rel="icon" href="favicon.ico" sizes="32x32">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <link rel="preload" as="font" href="../assets/fonts/proza-libre-medium.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="../assets/fonts/proza-libre-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="image" href="assets/cena/mobile-780.webp" imagesrcset="assets/cena/mobile-780.webp 780w, assets/cena/mobile-1170.webp 1170w" imagesizes="100vw" media="not all and (min-width: 900px) and (min-aspect-ratio: 1/1)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/cena/desktop-1600.webp" imagesrcset="assets/cena/desktop-1600.webp 1600w, assets/cena/desktop-2560.webp 2560w" imagesizes="100vw" media="(min-width: 900px) and (min-aspect-ratio: 1/1)" fetchpriority="high">
+  <!-- profundidade e máscara da cena (só o WebGL do hero.js usa: sem movimento reduzido), no mesmo enquadramento da foto
+       acima. as="fetch" + crossorigin casa com o fetch() do hero.js, que decodifica fora da thread principal -->
+  <link rel="preload" as="fetch" href="assets/cena/mobile-prof.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (not ((min-width: 900px) and (min-aspect-ratio: 1/1)))">
+  <link rel="preload" as="fetch" href="assets/cena/mobile-mascara.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (not ((min-width: 900px) and (min-aspect-ratio: 1/1)))">
+  <link rel="preload" as="fetch" href="assets/cena/desktop-prof.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-aspect-ratio: 1/1)">
+  <link rel="preload" as="fetch" href="assets/cena/desktop-mascara.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-aspect-ratio: 1/1)">
+  <link rel="stylesheet" href="novo.css?v={{ v }}">
+  <link rel="stylesheet" href="secoes.css?v={{ v }}">
+  <link rel="stylesheet" href="lead.css?v={{ v }}">
+  <script>document.documentElement.classList.replace("no-js", "js");</script>
+  <script type="application/ld+json">
+{{ jsonld }}
+  </script>
+  <!-- textos da edição que o hero.js e o secoes.js montam (gerado por tools/gerar.py; sem ele, o JS usa os da edição de 2026) -->
+  <script id="dados-edicao" type="application/json">{{ dados_js }}</script>
+</head>
+<body>
+  <a class="pular" href="#hero-titulo">Pular para o conteúdo</a>
+
+  <header class="topo">
+    <a class="marca" href="./" aria-label="Clube de Negócios Hotéis &amp; Resorts, início"></a>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-titulo"{{ painel("textos.hero") }}>
+      <div class="hero__cena">
+        <picture>
+          <source media="not all and (min-width: 900px) and (min-aspect-ratio: 1/1)" srcset="assets/cena/mobile-780.webp 780w, assets/cena/mobile-1170.webp 1170w" sizes="100vw">
+          <img class="hero__plano" src="assets/cena/desktop-1600.webp" srcset="assets/cena/desktop-1600.webp 1600w, assets/cena/desktop-2560.webp 2560w" sizes="100vw" alt="" width="2560" height="1600" fetchpriority="high" decoding="async">
+        </picture>
+        <canvas class="hero__foco" aria-hidden="true"></canvas>
+
+        <!-- o trio na mesma escala: posição e tamanho em px do grupo (tools/resort/trio.py, assets/trio/grupo.json) -->
+        <div class="trio">
+          <figure class="pessoa pessoa--pablo"{{ painel("palestrantes.hero.pablo") }} style="--x:0;--y:0;--w:800;--h:948" data-rosto="0.419,0.024,0.669,0.401" data-nome="{{ pal.hero.pablo.nome }}" data-fato="{{ pal.hero.pablo.fato }}">
+            <img src="assets/trio/pablo.webp" alt="{{ pal.hero.pablo.nome }}" width="800" height="948" decoding="async">
+          </figure>
+          <figure class="pessoa pessoa--nezio"{{ painel("palestrantes.hero.nezio") }} style="--x:679.7;--y:50.3;--w:831.8;--h:715.6" data-rosto="0.353,0.005,0.621,0.487" data-nome="{{ pal.hero.nezio.nome }}" data-fato="{{ pal.hero.nezio.fato }}">
+            <img src="assets/trio/nezio.webp" alt="{{ pal.hero.nezio.nome }}" width="1174" height="1010" decoding="async">
+          </figure>
+          <figure class="pessoa pessoa--enio"{{ painel("palestrantes.hero.enio") }} style="--x:263.2;--y:4.4;--w:849.1;--h:1364" data-rosto="0.437,0.005,0.741,0.256" data-nome="{{ pal.hero.enio.nome }}" data-fato="{{ pal.hero.enio.fato }}">
+            <img src="assets/trio/enio.webp" alt="{{ pal.hero.enio.nome }}" width="803" height="1290" decoding="async">
+          </figure>
+        </div>
+
+        <div class="foco" aria-hidden="true">
+          <div class="foco__caixa"></div>
+          <p class="foco__rotulo"><b class="foco__nome"></b><span class="foco__fato"></span></p>
+        </div>
+        <p class="hero__dica" aria-hidden="true"></p>
+      </div>
+
+      <div class="hero__cabeca">
+        <span class="hero__marca" role="img" aria-label="Clube de Negócios Hotéis &amp; Resorts"></span>
+        <h1 class="hero__titulo" id="hero-titulo"{{ campo("textos.hero.titulo") }}>{{ t.hero.titulo | replace("*", "") }}</h1>
+      </div>
+
+      <div class="hero__base">
+        <p class="hero__apoio"{{ campo("textos.hero.apoio") }}>{{ t.hero.apoio }}</p>
+        <div class="hero__acoes">
+          <a class="botao" href="{{ whats }}" rel="noopener">
+            <span>Garantir meu acesso</span>
+            {{ seta }}
+          </a>
+        </div>
+        <p class="hero__rodape">
+          <span class="hero__quando"{{ painel("datas") }}>{{ quando_html }} · {{ frag("datas.local_curto", d.datas.local_curto) }}</span>
+          <span class="hero__aviso"{{ campo("textos.hero.aviso") }}>{{ t.hero.aviso }}</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ o que o Clube faz: a segunda seção responde "o que é isto?"
+         em bento: o Dia 1 (aprender) domina, negociar fica em pé ao lado, o resort do Dia 2 corre largo embaixo e a
+         faixa verde diz o que cada ingresso cobre. Fotos reais da edição anterior e o render do resort; cada célula
+         leva à seção que conta aquilo em detalhe -->
+    <section class="secao secao--nevoa oque" id="oque" aria-labelledby="oque-titulo">
+      <div class="miolo">
+        <header class="oque__cabeca">
+          <p class="selo"{{ campo("textos.oque.selo") }}>{{ t.oque.selo }}</p>
+          <h2 class="titulo" id="oque-titulo"{{ campo("textos.oque.titulo") }}>{{ t.oque.titulo }}</h2>
+          <p class="lede"{{ campo("textos.oque.lede") }}>{{ t.oque.lede }}</p>
+        </header>
+
+        <div class="oque__grade">
+{%- for c, alvo, largura in [["aprender", "#mentores", [[1600], 1600]], ["negociar", "#mesa", [[1600], 1600]], ["resort", "#voo", [[800, 1600], 1600]]] %}
+          <article class="oque__celula oque__celula--{{ c }}">
+            {{ quadro(c, alvo, largura) }}
+            <p class="oque__fonte"{{ campo("textos.oque." ~ c ~ ".fonte") }}>{{ t.oque[c].fonte }}</p>
+            <div class="oque__corpo">
+              <p class="oque__quando"><span{{ campo("textos.oque." ~ c ~ ".dia") }}>{{ t.oque[c].dia }}</span> {{ frag("textos.oque." ~ c ~ ".quando", t.oque[c].quando) }}</p>
+              <h3 class="oque__verbo"{{ campo("textos.oque." ~ c ~ ".verbo") }}>{{ t.oque[c].verbo }}</h3>
+              <p class="oque__texto"{{ campo("textos.oque." ~ c ~ ".texto") }}>{{ t.oque[c].texto }}</p>
+              <a class="oque__ir" href="{{ alvo }}">{{ frag("textos.oque." ~ c ~ ".link", t.oque[c].link) }} {{ desce }}</a>
+            </div>
+          </article>
+{% endfor %}
+          <article class="oque__celula oque__celula--ingressos">
+            <p class="oque__quando"{{ campo("textos.oque.dois_dias.quando") }}>{{ t.oque.dois_dias.quando }}</p>
+            <p class="oque__planos"{{ lista("textos.oque.dois_dias.frases") }}>{% for f in t.oque.dois_dias.frases %}{% if not loop.first %} {% endif %}<span{{ item(loop.index0) }}{{ campo("textos.oque.dois_dias.frases." ~ loop.index0) }}>{{ f | enfase }}</span>{% endfor %}</p>
+            <a class="oque__ir" href="#programa">{{ frag("textos.oque.dois_dias.link", t.oque.dois_dias.link) }} {{ desce }}</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ a mesa: o problema e a resposta, contados pela imagem
+         a sala começa à meia-luz com as cinco cadeiras vazias; cada lugar clareia a partir da cadeira com a rolagem, o
+         objeto diante de cada pessoa diz quem ela é e o rótulo, no próprio lugar, confirma. O texto ao lado só fecha a ideia -->
+    <section class="secao mesa" id="mesa" aria-labelledby="mesa-titulo">
+      <div class="mesa__palco">
+        <header class="mesa__cabeca">
+          <p class="selo mesa__selo"{{ campo("textos.mesa.selo") }}>{{ t.mesa.selo }}</p>
+          <h2 class="titulo" id="mesa-titulo"{{ campo("textos.mesa.titulo") }}>{{ t.mesa.titulo }}</h2>
+          <ol class="mesa__passos" aria-hidden="true"><li></li><li></li><li></li><li></li><li></li></ol>
+          <p class="mesa__virada"{{ campo("textos.mesa.virada") }}>{{ t.mesa.virada | enfase }}</p>
+        </header>
+
+        <figure class="mesa__planta">
+          <img class="mesa__base" src="assets/mesa/mesa-900.webp" srcset="assets/mesa/mesa-900.webp 900w, assets/mesa/mesa-1600.webp 1600w" sizes="(min-width: 900px) min(82svh, 52vw), 100vw" alt="Mesa redonda vista de cima, com cinco poltronas: o dono do hotel com a chave, o investidor com a calculadora, o dono do terreno com os mapas, o mentor com o livro e quem decide com o contrato" width="1600" height="1600" loading="lazy" decoding="async">
+          <div class="mesa__veu" aria-hidden="true"></div>
+          <img class="mesa__pessoa" data-lugar="0" src="assets/mesa/pessoa1-900.webp" srcset="assets/mesa/pessoa1-900.webp 900w, assets/mesa/pessoa1-1600.webp 1600w" sizes="(min-width: 900px) min(82svh, 52vw), 100vw" alt="" width="1600" height="1600" loading="lazy" decoding="async" aria-hidden="true">
+          <img class="mesa__pessoa" data-lugar="1" src="assets/mesa/pessoa2-900.webp" srcset="assets/mesa/pessoa2-900.webp 900w, assets/mesa/pessoa2-1600.webp 1600w" sizes="(min-width: 900px) min(82svh, 52vw), 100vw" alt="" width="1600" height="1600" loading="lazy" decoding="async" aria-hidden="true">
+          <img class="mesa__pessoa" data-lugar="2" src="assets/mesa/pessoa3-900.webp" srcset="assets/mesa/pessoa3-900.webp 900w, assets/mesa/pessoa3-1600.webp 1600w" sizes="(min-width: 900px) min(82svh, 52vw), 100vw" alt="" width="1600" height="1600" loading="lazy" decoding="async" aria-hidden="true">
+          <img class="mesa__pessoa" data-lugar="3" src="assets/mesa/pessoa4-900.webp" srcset="assets/mesa/pessoa4-900.webp 900w, assets/mesa/pessoa4-1600.webp 1600w" sizes="(min-width: 900px) min(82svh, 52vw), 100vw" alt="" width="1600" height="1600" loading="lazy" decoding="async" aria-hidden="true">
+          <img class="mesa__pessoa" data-lugar="4" src="assets/mesa/pessoa5-900.webp" srcset="assets/mesa/pessoa5-900.webp 900w, assets/mesa/pessoa5-1600.webp 1600w" sizes="(min-width: 900px) min(82svh, 52vw), 100vw" alt="" width="1600" height="1600" loading="lazy" decoding="async" aria-hidden="true">
+          <ol class="mesa__rotulos" aria-label="Quem senta à mesa">
+            <li class="rotulo-lugar" data-lugar="0" style="--x:50%;--y:10.5%;--ax:-50%;--ay:-100%"><span>Quem tem o hotel</span></li>
+            <li class="rotulo-lugar" data-lugar="1" style="--x:93%;--y:30.5%;--ax:-100%;--ay:-100%"><span>Quem tem o capital</span></li>
+            <li class="rotulo-lugar" data-lugar="2" style="--x:72%;--y:86%;--ax:-50%;--ay:0%"><span>Quem tem o terreno</span></li>
+            <li class="rotulo-lugar" data-lugar="3" style="--x:31%;--y:86%;--ax:-50%;--ay:0%"><span>Quem já fez</span></li>
+            <li class="rotulo-lugar" data-lugar="4" style="--x:7%;--y:30.5%;--ax:0%;--ay:-100%"><span>Quem decide</span></li>
+          </ol>
+          <figcaption class="mesa__legenda-planta">Imagem ilustrativa</figcaption>
+        </figure>
+
+        <!-- o que cada lugar quer dizer, por extenso, para quem lê sem ver a imagem -->
+        <ul class="mesa__perfis apenas-leitor">
+          <li>Donos de hotéis e resorts: proprietários com operações ativas e visão de expansão patrimonial.</li>
+          <li>Investidores com capital disponível: perfis com liquidez real buscando ativos no setor hoteleiro e turístico.</li>
+          <li>Empresários com terrenos e projetos: detentores de áreas com potencial turístico buscando estruturação e viabilidade.</li>
+          <li>Mentores com bilhões em negócios: referências que já estruturaram e alavancaram projetos de grande escala.</li>
+          <li>Tomadores de decisão reais: apenas quem decide, executa e tem poder de ação no mercado.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ quem conduz o Clube -->
+    <section class="secao mentores secao--nevoa" id="mentores" aria-labelledby="mentores-titulo">
+      <div class="miolo">
+        <h2 class="titulo mentores__titulo" id="mentores-titulo"{{ campo("textos.palestrantes_titulo") }}>{{ t.palestrantes_titulo }}</h2>
+{% set p = pal.principal %}{% set f = img(cru.palestrantes.principal.foto) %}
+        <article class="enio" aria-labelledby="{{ p.id }}-nome"{{ painel("palestrantes.principal") }}>
+          <figure class="retrato retrato--{{ p.id }}"{{ sem_recorte(p.id, "4 / 5") }}>
+            <img{{ campo_img("palestrantes.principal.foto") }} src="{{ f.src }}" alt="{{ p.foto_alt }}" width="{{ f.w }}" height="{{ f.h }}"{{ foto_sem_recorte(p.id, cru.palestrantes.principal.foto) }} loading="lazy" decoding="async">
+          </figure>
+          <div class="enio__texto">
+            <h3 class="nome" id="{{ p.id }}-nome"{{ campo("palestrantes.principal.nome") }}>{{ p.nome }}</h3>
+            <p class="bio"{{ campo("palestrantes.principal.bio") }}>{{ p.bio }}</p>
+
+            <div class="metrica metrica--unidades">
+              <p class="metrica__valor"><span data-contar="{{ p.unidades }}"{{ campo("palestrantes.principal.unidades") }}>{{ milhar(p.unidades) }}</span>+</p>
+              <canvas class="unidades" aria-hidden="true"></canvas>
+              <p class="metrica__rotulo"{{ campo("palestrantes.principal.unidades_rotulo") }}>{{ p.unidades_rotulo }}</p>
+            </div>
+
+            <div class="metrica metrica--anos">
+              <p class="metrica__valor">{{ frag("palestrantes.principal.anos", p.anos) }} anos</p>
+              <div class="regua" aria-hidden="true"></div>
+              <p class="metrica__rotulo"{{ campo("palestrantes.principal.anos_rotulo") }}>{{ p.anos_rotulo }}</p>
+            </div>
+
+            <p class="premio"><span class="premio__nome"{{ campo("palestrantes.principal.premio") }}>{{ p.premio }}</span><span class="premio__de"{{ campo("palestrantes.principal.premio_de") }}>{{ p.premio_de }}</span></p>
+          </div>
+        </article>
+
+        <div class="mentores__par"{{ lista("palestrantes.outros") }}>
+{%- for m in pal.outros %}{% set f = img(cru.palestrantes.outros[loop.index0].foto) %}{% set po = "palestrantes.outros." ~ loop.index0 %}
+          <article class="mentor" aria-labelledby="{{ m.id }}-nome"{{ item(loop.index0) }}{{ painel(po) }}>
+            <figure class="retrato retrato--{{ m.id }}"{{ sem_recorte(m.id, "5 / 4") }}>
+              <img{{ campo_img(po ~ ".foto") }} src="{{ f.src }}" alt="{{ m.foto_alt }}" width="{{ f.w }}" height="{{ f.h }}"{{ foto_sem_recorte(m.id, cru.palestrantes.outros[loop.index0].foto) }} loading="lazy" decoding="async">
+            </figure>
+            <h3 class="nome" id="{{ m.id }}-nome"{{ campo(po ~ ".nome") }}>{{ m.nome }}</h3>
+            <p class="bio"{{ campo(po ~ ".bio") }}>{{ m.bio }}</p>
+{%- if m.fatos | length %}
+            <dl class="fatos"{{ lista(po ~ ".fatos") }}>
+{%- for x in m.fatos %}
+              <div{{ item(loop.index0) }}><dt{{ campo(po ~ ".fatos." ~ loop.index0 ~ ".numero") }}>{{ x.numero }}</dt><dd{{ campo(po ~ ".fatos." ~ loop.index0 ~ ".texto") }}>{{ x.texto }}</dd></div>
+{%- endfor %}
+            </dl>
+{%- endif %}
+          </article>
+{%- endfor %}
+        </div>
+{% if pal.convidados.quantidade %}
+        <div class="convidados"{{ painel("palestrantes.convidados") }}>
+          <p class="convidados__num" aria-hidden="true">+{{ pal.convidados.quantidade }}</p>
+          <div>
+            <h3 class="convidados__titulo"{{ campo("palestrantes.convidados.titulo") }}>{{ pal.convidados.titulo }}</h3>
+            <p{{ campo("palestrantes.convidados.texto") }}>{{ pal.convidados.texto }}</p>
+          </div>
+        </div>
+{%- endif %}
+      </div>
+    </section>
+
+    <!-- ============================================================ a obra: o sonho virando resort
+         a rolagem passa do terreno vazio à estrutura (ilustrativo), à obra mês a mês (câmera da obra, quadros restaurados) e à
+         primeira noite acesa. A imagem fica em cima; embaixo, numa faixa branca, a frase da fase e a régua das datas -->
+    <section class="obra" id="obra" aria-labelledby="obra-titulo">
+      <div class="obra__palco">
+        <div class="obra__quadro">
+          <img class="obra__poster" src="assets/obra/d/noite.webp" srcset="assets/obra/m/noite.webp 700w, assets/obra/d/noite.webp 1600w" sizes="100vw" alt="O resort pronto na primeira noite, com as alas de madeira e pedra acesas e a praça iluminada" width="1600" height="900" loading="lazy" decoding="async">
+          <canvas class="obra__tela" aria-hidden="true"></canvas>
+        </div>
+        <div class="obra__faixa">
+          <div class="obra__frases">
+            <h2 class="obra__frase" id="obra-titulo" data-fase="zero">Todo resort começa do zero.</h2>
+            <p class="obra__frase" data-fase="obra">Mês a mês, a obra.</p>
+            <p class="obra__frase" data-fase="noite">Até a primeira noite <em>acesa</em>.</p>
+          </div>
+          <p class="obra__apoio">Ênio Almeida estrutura projetos assim. Um resort real, com participação dele, visto pela câmera da obra.</p>
+          <div class="obra__regua" aria-hidden="true">
+            <div class="obra__trilho"><i class="obra__marcador"></i></div>
+            <p class="obra__datas"><span>jun 2021</span><b class="obra__hoje">jun 2021</b><span>abr 2022</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ os dois dias: linha do tempo vertical, com um quadro preso
+         ao lado que troca a imagem quando o Dia 2 chega: o palco da edição anterior para o Dia 1, o resort para
+         "outro dentro de um resort". A linha enche de ouro com a rolagem e cada dia acende quando ela passa -->
+{%- set f1 = img(cru.datas.dias[0].foto) %}{% set f2 = img(cru.datas.dias[1].foto, [800, 1400], 1400) %}
+    <section class="secao programa secao--nevoa" id="programa" aria-labelledby="programa-titulo">
+      <div class="miolo programa__grade">
+        <div class="programa__palco" aria-hidden="true">
+          <div class="programa__quadro">
+            <img class="programa__img programa__img--palco"{{ campo_img("datas.dias.0.foto") }} src="{{ f1.src }}"{% if f1.srcset %} srcset="{{ f1.srcset }}" sizes="40vw"{% endif %} alt="" width="{{ f1.w }}" height="{{ f1.h }}" loading="lazy" decoding="async">
+            <img class="programa__img programa__img--resort"{{ campo_img("datas.dias.1.foto") }} src="{{ f2.src }}"{% if f2.srcset %} srcset="{{ f2.srcset }}" sizes="40vw"{% endif %} alt="" width="{{ f2.w }}" height="{{ f2.h }}" loading="lazy" decoding="async">
+            <p class="programa__etiqueta">{% for x in dias %}<span data-dia="{{ x.n }}"{{ painel("datas.dias." ~ loop.index0) }}>Dia {{ x.n }} · {{ x.cidade }}</span>{% endfor %}</p>
+            <p class="programa__fonte">{% for x in dias %}<span data-dia="{{ x.n }}"{{ campo("datas.dias." ~ loop.index0 ~ ".foto_fonte") }}>{{ x.foto_fonte }}</span>{% endfor %}</p>
+          </div>
+        </div>
+
+        <div class="programa__texto">
+          <header class="programa__cabeca">
+            <p class="selo"{{ campo("textos.programa.selo") }}>{{ t.programa.selo }}</p>
+            <h2 class="titulo" id="programa-titulo"{{ campo("textos.programa.titulo") }}>{{ t.programa.titulo | enfase }}</h2>
+            <p class="lede"{{ campo("textos.programa.lede") }}>{{ t.programa.lede }}</p>
+          </header>
+
+          <ol class="linha">
+{%- for x in dias %}{% set f = img(cru.datas.dias[loop.index0].foto, [800, 1400], 800) %}{% set pd = "datas.dias." ~ loop.index0 %}
+            <li class="dia" data-dia="{{ x.n }}">
+              <p class="dia__num" aria-hidden="true">{{ x.num }}</p>
+              <h3 class="dia__onde"{{ campo(pd ~ ".local") }}>{{ x.local }}</h3>
+              <p class="dia__quando"{{ painel(pd) }}><time datetime="{{ x.iso }}">{{ x.semana_dia }}</time> · {{ x.cidade }}, {{ x.uf }}</p>
+              <figure class="dia__foto">
+                <img{% if loop.first %} class="dia__foto-palco"{% endif %}{{ campo_img(pd ~ ".foto") }} src="{{ f.src }}"{% if f.srcset %} srcset="{{ f.srcset }}" sizes="100vw"{% endif %} alt="{{ x.foto_alt }}" width="{{ f.w }}" height="{{ f.h }}"{{ estilo(foco(cru.datas.dias[loop.index0].foto)) }} loading="lazy" decoding="async">
+                <figcaption{{ campo(pd ~ ".foto_fonte") }}>{{ x.foto_fonte }}</figcaption>
+              </figure>
+              <ol class="dia__agenda"{{ lista(pd ~ ".agenda") }}>
+{%- for a in x.agenda %}
+                <li{{ item(loop.index0) }}{{ painel(pd ~ ".agenda." ~ loop.index0) }}><span class="hora"{{ campo(pd ~ ".agenda." ~ loop.index0 ~ ".hora") }}>{{ a.hora }}</span><span class="dia__ato"{{ campo(pd ~ ".agenda." ~ loop.index0 ~ ".ato") }}>{{ a.ato }}</span>{% if a.nota %}<span class="dia__nota"{{ campo(pd ~ ".agenda." ~ loop.index0 ~ ".nota") }}>{{ a.nota }}</span>{% endif %}</li>
+{%- endfor %}
+              </ol>
+            </li>
+{%- endfor %}
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ o voo: do vale do hero até a piscina do Dia 2 -->
+    <section class="voo" id="voo" aria-labelledby="voo-titulo">
+      <div class="voo__palco">
+        <div class="voo__quadro">
+          <img class="voo__poster" src="assets/voo/poster-1600.webp" srcset="assets/voo/poster-800.webp 800w, assets/voo/poster-1600.webp 1600w" sizes="100vw" alt="Vista aérea do Resort das Oliveiras: o lago, as alas do hotel e a piscina de praia, em Porto Feliz" width="1600" height="1000" loading="lazy" decoding="async">
+          <canvas class="voo__tela" aria-hidden="true"></canvas>
+          <p class="voo__marca" data-ponto="lago" aria-hidden="true"><i></i><span>Lago</span></p>
+          <p class="voo__marca" data-ponto="alas" aria-hidden="true"><i></i><span>Alas do hotel</span></p>
+          <p class="voo__marca voo__marca--fim" data-ponto="piscina" aria-hidden="true"{{ painel("datas") }}><i></i><span>Piscina de praia <b>{{ (dias | last).chegada_hora }} · visita técnica</b></span></p>
+          <p class="voo__fato">Render do projeto</p>
+        </div>
+        <div class="voo__texto">
+          <h2 class="voo__titulo" id="voo-titulo"{{ campo("textos.voo.titulo") }}>{{ t.voo.titulo }}</h2>
+          <p class="voo__apoio"{{ campo("textos.voo.apoio") }}>{{ t.voo.apoio }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ edição anterior -->
+    <section class="secao edicao" aria-labelledby="edicao-titulo">
+      <div class="miolo">
+        <header class="edicao__cabeca">
+          <h2 class="titulo" id="edicao-titulo"{{ campo("textos.edicao.titulo") }}>{{ t.edicao.titulo | enfase }}</h2>
+          <p class="lede"{{ campo("textos.edicao.lede") }}>{{ t.edicao.lede }}</p>
+        </header>
+
+        <figure class="filme">
+          <video class="filme__video"{{ campo_img("textos.edicao.video_capa") }}{{ painel("textos.edicao") }} muted playsinline loop preload="none" poster="{{ img(cru.textos.edicao.video_capa, [1280]).src }}" data-src-largo="{{ video(cru.textos.edicao.video) }}" data-src-curto="{{ video(cru.textos.edicao.video_curto) }}" aria-label="{{ t.edicao.video_rotulo }}"></video>
+          <div class="filme__barra">
+            <button class="filme__som filme__pausa" type="button" aria-label="Tocar o filme" data-estado="parado"><span class="filme__pausa-icone" aria-hidden="true"></span></button>
+            <button class="filme__som" type="button" aria-pressed="false"><span class="filme__icone" aria-hidden="true"></span><span class="filme__texto">Ouvir</span></button>
+            <figcaption{{ campo("textos.edicao.video_legenda") }}>{{ t.edicao.video_legenda }}</figcaption>
+            <a class="filme__link" href="{{ t.edicao.youtube }}" rel="noopener" target="_blank">Ver no YouTube</a>
+          </div>
+        </figure>
+
+        <div class="edicao__fotos"{{ lista("textos.edicao.fotos") }}>
+{%- for x in t.edicao.fotos %}{% set f = img(cru.textos.edicao.fotos[loop.index0].foto) %}
+          <img{{ item(loop.index0) }}{{ campo_img("textos.edicao.fotos." ~ loop.index0 ~ ".foto") }} src="{{ f.src }}" alt="{{ x.alt }}" width="{{ f.w }}" height="{{ f.h }}"{{ estilo(foco(cru.textos.edicao.fotos[loop.index0].foto)) }} loading="lazy" decoding="async">
+{%- endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ manifesto -->
+    <section class="secao secao--joia manifesto" aria-labelledby="manifesto-titulo">
+      <div class="miolo">
+        <p class="manifesto__antes"{{ campo("textos.manifesto.antes") }}>{{ t.manifesto.antes }}</p>
+        <ul class="manifesto__nao" aria-label="O Clube não é"{{ lista("textos.manifesto.nao") }}>
+{%- for x in t.manifesto.nao %}
+          <li{{ item(loop.index0) }}><span class="risco"{{ campo("textos.manifesto.nao." ~ loop.index0) }}>{{ x }}</span></li>
+{%- endfor %}
+        </ul>
+        <h2 class="manifesto__frase" id="manifesto-titulo"{{ campo("textos.manifesto.frase") }}>{{ t.manifesto.frase | enfase }}</h2>
+        <p class="manifesto__apoio"{{ campo("textos.manifesto.apoio") }}>{{ t.manifesto.apoio }}</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ ingressos -->
+    <section class="secao ingressos secao--nevoa" id="ingressos" aria-labelledby="ingressos-titulo">
+      <div class="miolo">
+        <header class="ingressos__cabeca">
+          <p class="selo"{{ campo("textos.ingressos.selo") }}>{{ t.ingressos.selo }}</p>
+          <h2 class="titulo" id="ingressos-titulo"{{ campo("textos.ingressos.titulo") }}>{{ t.ingressos.titulo }}</h2>
+          <p class="lede"{{ campo("textos.ingressos.lede") }}>{{ t.ingressos.lede }}</p>
+        </header>
+
+        <div class="ingressos__corpo">
+          <div class="chaves" role="tablist" aria-label="Ingressos"{{ lista("ingressos.lista") }}>
+{%- for g in ing.lista %}
+            <button class="chave" role="tab" id="aba-{{ g.id }}" aria-controls="painel-ingresso" aria-selected="{{ 'true' if loop.first else 'false' }}" data-ingresso="{{ g.id }}"{% if not loop.first %} tabindex="-1"{% endif %}{{ item(loop.index0) }}{{ painel("ingressos.lista." ~ loop.index0) }}>
+              {% if g.selo %}<span class="chave__topo"><span class="chave__selo"{{ campo("ingressos.lista." ~ loop.index0 ~ ".selo") }}>{{ g.selo }}</span></span>{% else %}<span class="chave__topo" aria-hidden="true"></span>{% endif %}
+              <span class="chave__nome"{{ campo("ingressos.lista." ~ loop.index0 ~ ".nome") }}>{{ g.nome }}</span>
+              <span class="chave__linha"{{ campo("ingressos.lista." ~ loop.index0 ~ ".linha") }}>{{ g.linha }}</span>
+            </button>
+{%- endfor %}
+          </div>
+
+          <figure class="acessos" aria-hidden="true"{{ " data-planta" if edicao else "" }}>
+            {{ planta_larga }}
+            {{ planta_alta }}
+            <figcaption class="acessos__legenda"><span class="acessos__aceso">Incluído no ingresso</span><span class="acessos__apagado">Fica de fora</span></figcaption>
+          </figure>
+
+          <div class="ingressos__lado" id="painel-ingresso" role="tabpanel" aria-labelledby="aba-{{ ing.lista[0].id }}"{{ lista("ingressos.lista") }}>
+{%- for g in ing.lista %}{% set pg = "ingressos.lista." ~ loop.index0 %}
+            <div class="ingresso" data-painel="{{ g.id }}"{% if not loop.first %} hidden{% endif %}{{ item(loop.index0) }}>
+              <p class="ingresso__resumo"{{ campo(pg ~ ".resumo") }}>{{ g.resumo }}</p>
+              <p class="ingresso__rotulo"{{ campo(pg ~ ".rotulo") }}>{{ g.rotulo }}</p>
+              <ul class="ingresso__destaques"{{ lista(pg ~ ".destaques") }}>
+{%- for x in g.destaques %}
+                <li{{ item(loop.index0) }}{{ campo(pg ~ ".destaques." ~ loop.index0) }}>{{ x | enfase }}</li>
+{%- endfor %}
+              </ul>
+              <details class="ingresso__tudo">
+                <summary>Tudo o que está incluído <span>{{ g.itens | length }} {{ 'item' if g.itens | length == 1 else 'itens' }}</span></summary>
+                <ul class="ingresso__itens"{{ lista(pg ~ ".itens") }}>
+{%- for x in g.itens %}
+                  <li{{ item(loop.index0) }}{{ campo(pg ~ ".itens." ~ loop.index0) }}>{{ x | enfase }}</li>
+{%- endfor %}
+                </ul>
+              </details>
+{%- if g.subir.texto %}
+              <div class="subir"{{ painel(pg ~ ".subir") }}>
+                <p class="subir__texto"{{ campo(pg ~ ".subir.texto") }}>{{ g.subir.texto }}</p>
+                <button class="subir__botao" type="button" data-ir="{{ g.subir.para }}"{{ campo(pg ~ ".subir.botao") }}>{{ g.subir.botao }}</button>
+              </div>
+{%- endif %}
+            </div>
+{%- endfor %}
+            <div class="ingressos__acao">
+              <a class="botao" href="{{ whats }}" rel="noopener">
+                <span>Garantir meu acesso</span>
+                {{ seta }}
+              </a>
+              <p class="ingresso__nota"{{ campo("textos.ingressos.nota") }}>{{ t.ingressos.nota }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ como chegar: o mapa com o trajeto e os dois endereços, e os aeroportos -->
+    <section class="secao local" id="local" aria-labelledby="local-titulo">
+      <div class="miolo">
+        <header class="local__cabeca">
+          <p class="selo"{{ campo("textos.local.selo") }}>{{ t.local.selo }}</p>
+          <h2 class="titulo" id="local-titulo"{{ campo("textos.local.titulo") }}>{{ t.local.titulo | enfase }}</h2>
+          <p class="lede"{{ campo("textos.local.lede") }}>{{ t.local.lede }}</p>
+        </header>
+
+        <!-- o mapa do Google, sem chave, sempre no trajeto de carro do Dia 1 ao Dia 2; o painel tem o endereço de cada dia
+             (A e B, como no mapa; clicar no nome volta o mapa ao trajeto) e abre a rota no Google Maps ou no Waze -->
+        <div class="mapa">
+          <div class="mapa__tela">
+            <iframe class="mapa__iframe" title="Mapa com o trajeto de carro {{ dias[0].de }}, em {{ dias[0].cidade }}, {{ (dias | last).para }}, em {{ (dias | last).cidade }}" src="{{ mapa_iframe }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          </div>
+
+          <ol class="mapa__paradas">
+{%- for x in dias %}
+{%- if not loop.first %}
+            <li class="mapa__entre"><span{{ campo("datas.deslocamento") }}>{{ d.datas.deslocamento }}</span></li>
+{%- endif %}
+            <li class="mapa__parada"{{ painel("datas.dias." ~ loop.index0) }}>
+              <button type="button" class="mapa__nome" title="Mostrar o trajeto no mapa"><span class="mapa__letra" aria-hidden="true">{{ x.letra }}</span><span class="mapa__nome-texto"{{ campo("datas.dias." ~ loop.index0 ~ ".local") }}>{{ x.local }}</span>{{ pino }}</button>
+              <p class="mapa__quando"><span>Dia {{ x.n }}</span> <time datetime="{{ x.iso }}T{{ x.chegada }}">{{ x.mapa_quando }}</time></p>
+              <p class="mapa__endereco">{{ x.endereco }}<br>{{ x.localidade }}, {{ x.uf }}</p>
+              <p class="mapa__acoes">
+                <span class="mapa__rotulo">Rota até lá</span>
+                <a class="mapa__botao" href="{{ x.rota_google }}" rel="noopener" target="_blank" aria-label="Rota até {{ x.com_artigo }} no Google Maps">Google Maps</a>
+                <a class="mapa__botao mapa__botao--leve" href="{{ x.rota_waze }}" rel="noopener" target="_blank" aria-label="Rota no Waze">Waze</a>
+              </p>
+            </li>
+{%- endfor %}
+          </ol>
+        </div>
+
+        <div class="aeroportos">
+          <div>
+            <h3 class="local__titulo">Do aeroporto até o local do evento</h3>
+            <p class="aeroportos__nota"{{ campo("datas.aeroportos_nota") }}>{{ d.datas.aeroportos_nota }}</p>
+          </div>
+          <table class="voos-tabela">
+            <thead>
+              <tr><th scope="col">Aeroporto</th>{% for x in dias %}<th scope="col">até {{ x.cidade }} <small>Dia {{ x.n }}</small></th>{% endfor %}</tr>
+            </thead>
+            <tbody{{ lista("datas.aeroportos") }}>
+{%- for a in d.datas.aeroportos %}
+              <tr{{ item(loop.index0) }}{{ painel("datas.aeroportos." ~ loop.index0) }}><th scope="row">{{ frag("datas.aeroportos." ~ loop.index0 ~ ".nome", a.nome) }} <small{{ campo("datas.aeroportos." ~ loop.index0 ~ ".sigla") }}>{{ a.sigla }}</small></th>{% for m in a.minutos %}<td style="--min:{{ m }}"><span>{{ minutos_br(m) }}</span><i></i></td>{% endfor %}</tr>
+{%- endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="local__extras">
+          <div class="local__grupo">
+            <h3 class="local__titulo">Como ir</h3>
+            <ul class="local__lista"{{ lista("datas.como_ir") }}>
+{%- for x in d.datas.como_ir %}
+              <li{{ item(loop.index0) }}><strong{{ campo("datas.como_ir." ~ loop.index0 ~ ".destaque") }}>{{ x.destaque }}</strong> {{ frag("datas.como_ir." ~ loop.index0 ~ ".texto", x.texto) }}</li>
+{%- endfor %}
+            </ul>
+            <p class="local__nota"{{ campo("datas.como_ir_nota") }}>{{ d.datas.como_ir_nota }}</p>
+          </div>
+          <div class="local__grupo">
+            <h3 class="local__titulo">Onde se hospedar</h3>
+            <ul class="hoteis"{{ lista("datas.hoteis") }}>
+{%- for x in d.datas.hoteis %}
+              <li{{ item(loop.index0) }}><strong{{ campo("datas.hoteis." ~ loop.index0 ~ ".nome") }}>{{ x.nome }}</strong><span{{ campo("datas.hoteis." ~ loop.index0 ~ ".distancia") }}>{{ x.distancia }}</span></li>
+{%- endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ fechamento -->
+    <section class="convite" id="convite" aria-labelledby="convite-titulo">
+      <div class="convite__texto">
+        <p class="convite__antes"{{ campo("textos.convite.antes") }}>{{ t.convite.antes }}</p>
+        <h2 class="convite__titulo" id="convite-titulo"{{ lista("textos.convite.frases") }}>{% for f in t.convite.frases %}{% if not loop.first %} {% endif %}<span{{ item(loop.index0) }}{{ campo("textos.convite.frases." ~ loop.index0) }}>{{ f | enfase }}</span>{% endfor %}</h2>
+        <div class="convite__acoes">
+          <a class="botao" href="{{ whats }}" rel="noopener">
+            <span>Garantir meu acesso</span>
+            {{ seta }}
+          </a>
+        </div>
+        <p class="convite__quando"{{ painel("datas") }}>{{ quando_html }} · {{ trajeto }}</p>
+      </div>
+      <div class="convite__fundo" aria-hidden="true">
+        <!-- duas camadas do mesmo render (tools/resort/fecho_camadas.py): morros ao fundo, ala e água na frente;
+             a névoa passa entre elas e a rolagem move cada uma numa velocidade -->
+        <img class="convite__longe" src="assets/cena/fecho-fundo-1600.webp" srcset="assets/cena/fecho-fundo-900.webp 900w, assets/cena/fecho-fundo-1600.webp 1600w, assets/cena/fecho-fundo-2560.webp 2560w" sizes="100vw" alt="" width="2560" height="1600" loading="lazy" decoding="async">
+        <div class="convite__nevoa"></div>
+        <img class="convite__perto" src="assets/cena/fecho-frente-1600.webp" srcset="assets/cena/fecho-frente-900.webp 900w, assets/cena/fecho-frente-1600.webp 1600w, assets/cena/fecho-frente-2560.webp 2560w" sizes="100vw" alt="" width="2560" height="1600" loading="lazy" decoding="async">
+        <div class="convite__nevoa convite__nevoa--agua"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape__marca" role="img" aria-label="Clube de Negócios Hotéis &amp; Resorts"></div>
+    <div class="rodape__colunas"{{ painel("datas") }}>
+      <p>{{ marcas.datas }}<br>{{ cidades }}</p>
+      <p>Imagens do resort são ilustrativas.<br>© {{ ano }} Clube de Negócios de Hotéis &amp; Resorts.</p>
+    </div>
+  </footer>
+
+  <div class="barra-cta" aria-hidden="true">
+    <a class="botao botao--barra" href="{{ whats }}" rel="noopener" tabindex="-1">
+      <span>Garantir meu acesso</span>
+      {{ seta }}
+    </a>
+  </div>
+
+  <!-- o pop-up de acesso: lead.js abre este cadastro em todo botão "Garantir meu acesso" -->
+  <dialog class="acesso" id="acesso" aria-labelledby="acesso-titulo" data-webhook="https://xfylbdxeciujemyavbaq.supabase.co/functions/v1/lead" data-webhook-reserva="https://functions-api.clint.digital/endpoints/integration/webhook/9628c695-8574-493a-9be7-1a1f0513d142">
+    <div class="acesso__painel">
+      <button class="acesso__fechar" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+
+      <div class="acesso__passo acesso__passo--form">
+        <span class="acesso__marca" aria-hidden="true"></span>
+        <p class="acesso__antes"{{ painel("datas") }}>{{ marcas.datas_sem_ano }} · {{ d.datas.local_curto }}</p>
+        <h2 class="acesso__titulo" id="acesso-titulo">Garantir meu acesso</h2>
+        <p class="acesso__texto">Deixe seu contato e um dos nossos especialistas fala com você pelo WhatsApp para confirmar o seu ingresso.</p>
+
+        <form class="acesso__form" novalidate>
+          <div class="acesso__campo">
+            <label for="acesso-nome">Nome completo</label>
+            <input id="acesso-nome" name="nome" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Seu nome e sobrenome" required>
+            <em class="acesso__erro" id="acesso-erro-nome">Escreva nome e sobrenome</em>
+          </div>
+          <div class="acesso__campo acesso__campo--tel">
+            <label for="acesso-tel">WhatsApp</label>
+            <div class="acesso__tel">
+              <button class="acesso__pais" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="acesso-paises" aria-label="País do telefone: Brasil, +55">
+                <span class="acesso__bandeira" aria-hidden="true"></span>
+                <span class="acesso__ddi" aria-hidden="true">+55</span>
+                <svg class="acesso__seta-pais" viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <input id="acesso-tel" name="telefone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(11) 91234-5678" enterkeyhint="next" required>
+            </div>
+            <div class="acesso__lista" id="acesso-paises" hidden>
+              <input class="acesso__busca" type="search" role="combobox" aria-haspopup="listbox" aria-autocomplete="list" aria-expanded="false" aria-controls="acesso-paises-lista" placeholder="Buscar país ou código" aria-label="Buscar país" autocomplete="off" spellcheck="false">
+              <ul role="listbox" id="acesso-paises-lista" aria-label="Países"></ul>
+            </div>
+            <em class="acesso__erro" id="acesso-erro-tel">Confira o número, com DDD</em>
+          </div>
+          <div class="acesso__campo">
+            <label for="acesso-email">E-mail</label>
+            <input id="acesso-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" list="acesso-dominios" placeholder="seu@email.com" required>
+            <em class="acesso__erro" id="acesso-erro-email">Confira o e-mail</em>
+          </div>
+          <datalist id="acesso-dominios"></datalist>
+          <button class="acesso__dica" type="button" hidden>Você quis dizer <b></b>?</button>
+          <label class="acesso__isca" aria-hidden="true">Site <input name="site" type="text" tabindex="-1" autocomplete="off"></label>
+          <button class="botao acesso__enviar" type="submit">
+            <span>Garantir meu acesso</span>
+            {{ seta }}
+          </button>
+          <p class="acesso__aviso">Ao continuar, você aceita ser contatado pela equipe do Clube por WhatsApp e e-mail.</p>
+        </form>
+      </div>
+
+      <div class="acesso__passo acesso__passo--fim" aria-live="polite">
+        <span class="acesso__ok" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M5.5 12.5 10 17l8.5-9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 class="acesso__titulo" tabindex="-1">Informações recebidas</h2>
+        <p class="acesso__texto">Recebemos o seu interesse no Clube de Negócios de Hotéis &amp; Resorts.</p>
+        <p class="acesso__contato">Um dos nossos especialistas vai entrar em contato com você pelo WhatsApp, no número <b class="acesso__numero"></b>, em breve.</p>
+        <button class="acesso__voltar" type="button">Fechar</button>
+      </div>
+      <div class="acesso__passo acesso__passo--falha" aria-live="assertive">
+        <h2 class="acesso__titulo" tabindex="-1">Não conseguimos enviar</h2>
+        <p class="acesso__texto">A conexão falhou antes de os seus dados chegarem. Tente de novo; nada foi perdido.</p>
+        <button class="botao acesso__tentar" type="button"><span>Tentar de novo</span></button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- o GSAP antes do hero: a cortina de abertura usa a mesma biblioteca das seções -->
+  <script src="../vendor/gsap.min.js" defer></script>
+  <script src="../vendor/ScrollTrigger.min.js" defer></script>
+  <script src="hero.js?v={{ v }}" defer></script>
+  <script src="secoes.js?v={{ v }}" defer></script>
+  <script src="lead.js?v={{ v }}" defer></script>
+</body>
+</html>

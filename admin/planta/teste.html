@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Editor da planta · teste</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="planta.css">
+<style>
+  body { margin: 0; background: #f3f5f2; font-family: "Proza Libre", sans-serif; color: #071613; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 16px; }
+  details { margin-top: 24px; font-size: 13px; }
+  pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; background: #fff; padding: 12px; border-radius: 10px; max-height: 320px; overflow: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Planta de acessos</h1>
+  <div id="editor"></div>
+  <details><summary>Última planta enviada a aoMudar (<span id="n">0</span> alterações)</summary><pre id="saida"></pre></details>
+</main>
+<script type="module">
+  import { abrirEditorPlanta } from "./planta.js";
+
+  // a planta atual do site, no modelo v2 (12×9)
+  const planta = {
+    colunas: 12, linhas: 9,
+    salas: [
+      { id: "auditorio", nome: "Auditório", detalhe: "Dia 1 · conteúdo e negócios", tipo: "sala", x: 0, y: 0, w: 6, h: 6, abre: ["premium", "vip"],
+        zonas: [ { id: "zona-vip", nome: "Área VIP", abre: ["vip"] }, { id: "zona-premium", nome: "Assento Premium, junto ao palco", abre: ["premium"] } ] },
+      { id: "lounge-vip", nome: "Lounge VIP", detalhe: "coffee break", tipo: "sala", x: 6, y: 0, w: 3, h: 3, abre: ["premium", "vip"], zonas: [] },
+      { id: "camarim", nome: "Camarim e bastidores", detalhe: "", tipo: "sala", x: 9, y: 0, w: 3, h: 3, abre: ["premium"], zonas: [] },
+      { id: "almoco", nome: "Almoço com Ênio Almeida", detalhe: "", tipo: "sala", x: 6, y: 3, w: 3, h: 3, abre: ["premium"], zonas: [] },
+      { id: "consultoria", nome: "Consultoria estratégica", detalhe: "", tipo: "sala", x: 9, y: 3, w: 3, h: 3, abre: ["premium"], zonas: [] },
+      { id: "online", nome: "Online, pós-evento", detalhe: "3 dias de aulas ao vivo · 2 livros digitais", tipo: "online", x: 0, y: 6, w: 6, h: 3, abre: ["premium", "vip"], zonas: [] },
+      { id: "resort", nome: "Resort das Oliveiras", detalhe: "Dia 2 · visita técnica", tipo: "externa", x: 6, y: 6, w: 6, h: 3, abre: ["premium", "vip"], zonas: [] },
+    ],
+  };
+  let ingressos = [ { id: "premium", nome: "Premium" }, { id: "vip", nome: "VIP" } ];
+  const q = new URLSearchParams(location.search);
+
+  // ?dados=1 usa a planta real de site/novo/conteudo/edicao.json (v2, ingressos.planta)
+  if (q.has("dados")) {
+    const d = await (await fetch("../../conteudo/edicao.json")).json();
+    Object.keys(planta).forEach((k) => delete planta[k]);
+    Object.assign(planta, d.ingressos.planta);
+    ingressos = d.ingressos.lista.map((i) => ({ id: i.id, nome: i.nome }));
+  }
+  const original = JSON.stringify(planta);
+
+  // ?renderer=1 usa desenharPlanta da Frente A (site/novo/render/renderizar.mjs) se ela já existir; senão, o desenho local
+  let desenharPlanta;
+  if (q.has("renderer")) {
+    const m = await import("../../render/renderizar.mjs");
+    desenharPlanta = m.desenharPlanta;
+    document.title += m.desenharPlanta ? " · desenho da Frente A" : " · desenho local (Frente A ainda sem desenharPlanta)";
+  }
+
+  window.__mudancas = [];
+  window.__editor = abrirEditorPlanta(document.getElementById("editor"), {
+    planta, ingressos, desenharPlanta,
+    aoMudar(nova) {
+      window.__mudancas.push(nova);
+      document.getElementById("n").textContent = window.__mudancas.length;
+      document.getElementById("saida").textContent = JSON.stringify(nova, null, 1);
+    },
+  });
+  // o objeto recebido nunca muda
+  window.__originalIntacto = () => JSON.stringify(planta) === original;
+</script>
+</body>
+</html>
