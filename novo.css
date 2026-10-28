@@ -73,6 +73,15 @@ html {
   background: var(--branco);
   color: var(--tinta);
   scrollbar-color: var(--verde) var(--nevoa);
+  /* o foco por teclado nunca para sob o cabeçalho fixo nem sob a barra de compra (celular: 72px + a área segura + folga) */
+  scroll-padding-top: calc(var(--topo) + 16px);
+  scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  html {
+    scroll-padding-bottom: 0;
+  }
 }
 
 body {

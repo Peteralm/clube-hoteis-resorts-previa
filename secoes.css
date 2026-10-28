@@ -401,7 +401,8 @@
   position: sticky;
   top: 0;
   height: 100svh;
-  padding: calc(var(--topo) + 14px) 0 22px;
+  /* --mesa-barra: altura da barra de compra fixa, medida em secoes.js; a mesa centraliza no espaço acima dela */
+  padding: calc(var(--topo) + 14px) 0 calc(22px + var(--mesa-barra, 0px));
 }
 
 .mesa__cabeca {
@@ -482,8 +483,9 @@
   background: #f1f0ec;
 }
 
+/* --mesa-livre: o que sobra da tela depois do cabeçalho da seção e da barra (secoes.js); a conta fixa fica de reserva */
 .mesa--viva .mesa__planta {
-  width: min(100%, calc(100svh - var(--topo) - 250px));
+  width: min(100%, var(--mesa-livre, calc(100svh - var(--topo) - 250px)));
 }
 
 .mesa__planta img {
@@ -576,6 +578,19 @@
   .rotulo-lugar[data-lugar="4"] {
     --y: 58% !important;
     --ay: 0% !important;
+  }
+}
+
+/* planta estreita (celular de 320px): os rótulos lado a lado se encostavam; ficam um pouco menores */
+.mesa__planta {
+  container-type: inline-size;
+}
+
+@container (max-width: 300px) {
+  .rotulo-lugar span {
+    gap: 5px;
+    padding: 4px 7px 5px;
+    font-size: 0.6875rem;
   }
 }
 
@@ -1036,9 +1051,10 @@
   color: var(--ouro-texto);
 }
 
-/* sem movimento a seção mostra o fim: a noite acesa e a frase dela */
+/* sem movimento a seção mostra o fim: a noite acesa e a frase dela. As outras frases somem só da vista (o leitor de
+   tela continua lendo as três fases) */
 .obra__frase:not([data-fase="noite"]) {
-  visibility: hidden;
+  opacity: 0;
 }
 
 .obra__apoio {
@@ -1100,6 +1116,19 @@
   transition: opacity 0.3s var(--ease-estado);
 }
 
+/* com unidades de contêiner, o marcador anda por transform (sem refazer o layout a cada quadro da rolagem);
+   100cqw = a largura do trilho, a mesma base do left acima */
+@supports (width: 1cqw) {
+  .obra__trilho {
+    container-type: inline-size;
+  }
+  .obra__marcador {
+    left: 0;
+    transform: translateX(calc(var(--t, 1) * 100cqw));
+    will-change: transform;
+  }
+}
+
 .obra__datas {
   display: flex;
   justify-content: space-between;
@@ -1118,6 +1147,12 @@
 .obra__hoje {
   font-weight: 500;
   color: var(--esmeralda);
+}
+
+/* parada (sem script ou com movimento reduzido) a obra mostra a primeira noite com o marcador no fim: a data do quadro
+   ainda dizia "jun 2021" no meio da régua; só aparece quando a rolagem a atualiza */
+.obra:not(.obra--viva) .obra__hoje {
+  visibility: hidden;
 }
 
 /* ----- com movimento: a seção fica presa e a rolagem passa os quadros */
@@ -1143,7 +1178,6 @@
 }
 
 .obra--viva .obra__frase {
-  visibility: visible;
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.5s var(--ease-estado), transform 0.8s var(--ease-revela);
@@ -1865,6 +1899,30 @@
   opacity: 1;
 }
 
+/* tocar e pausar: o mesmo botão do "Ouvir", redondo e só com o ícone (o nome está no aria-label, secoes.js) */
+.filme__pausa {
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+}
+
+.filme__pausa-icone {
+  width: 12px;
+  height: 14px;
+  /* tocando: as duas barras de pausa */
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 4px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) 8px 0 / 4px 100% no-repeat;
+}
+
+/* parado: o triângulo de tocar */
+.filme__pausa[data-estado="parado"] .filme__pausa-icone {
+  width: 12px;
+  margin-left: 3px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
 .filme__link {
   /* alvo de toque de 44px sem mudar a barra: o botão "Ouvir" ao lado já tem essa altura */
   display: inline-flex;
@@ -2040,9 +2098,10 @@
   color: var(--ouro-claro);
 }
 
+/* um passo mais claro que --ouro-claro e o fundo um pouco mais leve: 4,5:1 sobre o verde do canto do cartão */
 .chave[aria-selected="true"] .chave__selo {
-  background: rgba(212, 176, 115, 0.18);
-  color: var(--ouro-claro);
+  background: rgba(212, 176, 115, 0.14);
+  color: #d9b77b;
 }
 
 /* a marca de escolhido: um ponto de luz no canto, a mesma luz das salas */

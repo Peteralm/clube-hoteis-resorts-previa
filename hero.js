@@ -222,16 +222,19 @@
   ].join("\n");
 
   function compilar(gl, tipo, fonte) {
+    // o resultado da compilação só é lido depois do link (programaPronto): ler aqui esperaria a placa de vídeo
     var s = gl.createShader(tipo);
     gl.shaderSource(s, fonte);
     gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
     return s;
   }
 
-  function textura(gl, img, modo) {
-    // modo: "srgb" (a foto, com mips), "dado" (profundidade e máscara) ou "pessoa" (pré-multiplicada, com mips)
+  function textura(gl, img, modo, unidade) {
+    // modo: "srgb" (a foto, com mips), "dado" (profundidade e máscara) ou "pessoa" (pré-multiplicada, com mips).
+    // img é um ImageBitmap já decodificado (os pixelStorei abaixo não valem para ele: as opções de bitmapDe() fazem
+    // o mesmo papel) ou, sem createImageBitmap, a própria <img>
     var t = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + unidade);
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, modo === "pessoa");
@@ -265,20 +268,89 @@
     });
   }
 
+  // ------------------------------------------------------------ decodificação fora da thread principal
+  // texImage2D e drawImage com uma <img> decodificam a foto inteira na thread principal (no celular, ~0,6 s parado).
+  // createImageBitmap de um Blob decodifica numa thread do navegador; createImageBitmap(<img>) não (decodifica na
+  // hora, na principal). Por isso os bytes vêm de fetch: para as fotos que a página já baixou, do cache HTTP
+  // ("force-cache" não revalida); para profundidade e máscara, do preload as="fetch" do <head>.
+  // Sem createImageBitmap/fetch, ou se falhar, volta para a <img> (o caminho antigo, o mesmo desenho).
+  var podeBitmap = typeof window.createImageBitmap === "function" && typeof window.fetch === "function" && typeof Blob !== "undefined";
+  var OPC_PESSOA = { premultiplyAlpha: "premultiply", colorSpaceConversion: "default", imageOrientation: "none" };
+  var OPC_DADO = { premultiplyAlpha: "none", colorSpaceConversion: "default", imageOrientation: "none" };
+
+  function bitmapDaUrl(url, opcoes, cache) {
+    return fetch(url, cache ? { cache: cache } : {}).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.blob();
+    }).then(function (b) { return createImageBitmap(b, opcoes); });
+  }
+
+  // uma <img> da página (já baixada) vira ImageBitmap; sem o caminho rápido, a própria <img>
+  function bitmapDe(img, opcoes) {
+    return pronta(img).then(function () {
+      if (!podeBitmap) return img;
+      return bitmapDaUrl(img.currentSrc || img.src, opcoes, "force-cache").catch(function () { return img; });
+    });
+  }
+
+  // profundidade e máscara não estão no HTML: o preload do <head> já as pediu
+  function bitmapDoArquivo(url) {
+    if (!podeBitmap) return carregar(url);
+    return bitmapDaUrl(url, OPC_DADO).catch(function () { return carregar(url); });
+  }
+
+  function largura(im) { return im.naturalWidth || im.width; }
+  function altura(im) { return im.naturalHeight || im.height; }
+  function fechar(im) { if (im && im.close && !(im instanceof HTMLImageElement)) im.close(); }
+
+  // um passo pesado por tarefa: entre um upload e outro o navegador respira (toque, rolagem, quadro)
+  function emTarefas(passos) {
+    return passos.reduce(function (cadeia, passo) {
+      return cadeia.then(function () {
+        return new Promise(function (ok, erro) {
+          setTimeout(function () {
+            try { ok(passo()); } catch (e) { erro(e); }
+          }, 0);
+        });
+      });
+    }, Promise.resolve());
+  }
+
   function prefixo() {
     // o <picture> escolhe a foto; profundidade e máscara seguem o mesmo enquadramento
     return /mobile-/.test(plano.currentSrc || plano.src) ? "assets/cena/mobile" : "assets/cena/desktop";
+  }
+
+  // o shader compila na placa de vídeo enquanto a página segue: com KHR_parallel_shader_compile a pergunta "linkou?"
+  // só é feita quando a resposta já está pronta (perguntar antes trava a thread principal até o fim da compilação,
+  // ~0,25 s no celular). Sem a extensão, pergunta na hora, como antes
+  function programaPronto(gl, prog) {
+    var ext = gl.getExtension("KHR_parallel_shader_compile");
+    return new Promise(function (ok) {
+      if (!ext) return ok();
+      (function esperar() {
+        if (gl.isContextLost() || gl.getProgramParameter(prog, ext.COMPLETION_STATUS_KHR)) ok();
+        else setTimeout(esperar, 16);
+      })();
+    });
   }
 
   function iniciarGL() {
     if (reduz) return Promise.resolve(null);
     var gl = canvas.getContext("webgl2", { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: "high-performance" });
     if (!gl) return Promise.resolve(null);
+    var prog, falhou = function () { GL = null; return null; };
     try {
-      var prog = gl.createProgram();
+      prog = gl.createProgram();
       gl.attachShader(prog, compilar(gl, gl.VERTEX_SHADER, VERT));
       gl.attachShader(prog, compilar(gl, gl.FRAGMENT_SHADER, FRAG));
       gl.linkProgram(prog);
+    } catch (e) {
+      return Promise.resolve(falhou());
+    }
+    // as texturas sobem enquanto o shader compila; os uniforms só depois do link
+    GL = { gl: gl, u: null, tex: null, base: null, larg: 0, alt: 0, pessoas: null };
+    var compilado = programaPronto(gl, prog).then(function () {
       if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
       gl.useProgram(prog);
       var buf = gl.createBuffer();
@@ -298,59 +370,97 @@
       gl.uniform1i(u.uP0, 3);
       gl.uniform1i(u.uP1, 4);
       gl.uniform1i(u.uP2, 5);
-      GL = { gl: gl, u: u, tex: null, base: null, larg: 0, alt: 0, pessoas: null };
-      return Promise.all([atualizarTexturas(), texturasDoTrio()]).then(function () { return GL; });
-    } catch (e) {
-      GL = null;
-      return Promise.resolve(null);
-    }
+      if (GL) GL.u = u;
+    });
+    var meu = GL;
+    return Promise.all([compilado, atualizarTexturas(), texturasDoTrio()]).then(function () { return GL; }, function () {
+      // shader que não linka (ou textura que não carrega): sem WebGL, as fotos do HTML desenham, como antes
+      if (GL === meu) falhou();
+      return null;
+    });
   }
 
   function texturasDoTrio() {
-    return Promise.all(ORDEM.map(function (id) { return pronta(pessoas[id].img); })).then(function (imgs) {
-      var gl = GL.gl;
-      GL.pessoas = imgs.map(function (img, i) {
-        gl.activeTexture(gl.TEXTURE3 + i);
-        return { tex: textura(gl, img, "pessoa"), larg: img.naturalWidth };
-      });
+    // as mesmas fontes decodificadas que prepararMascaras() pediu: cada foto do trio é decodificada uma vez só
+    return Promise.all(ORDEM.map(function (id) { return pessoas[id].fonte; })).then(function (fontes) {
+      var gl = GL.gl, prontas = [];
+      return emTarefas(fontes.map(function (im, i) {
+        return function () {
+          prontas[i] = { tex: textura(gl, im, "pessoa", 3 + i), larg: pessoas[ORDEM[i]].img.naturalWidth || largura(im) };
+          pessoas[ORDEM[i]].texturaPronta = true;
+          liberarFonte(pessoas[ORDEM[i]]);
+        };
+      })).then(function () { GL.pessoas = prontas; });
     });
   }
 
+  // a foto do trio é solta quando já virou máscara de toque e (com WebGL) textura
+  function liberarFonte(p) {
+    if (p.mascaraFeita && (p.texturaPronta || !GL)) p.fonte.then(fechar);
+  }
+
+  // as três texturas da cena sobem numa unidade de rascunho (6) e só no fim tomam o lugar das antigas (0, 1, 2):
+  // durante a troca (o celular girou para o desktop) nenhum quadro mistura a foto nova com a profundidade velha
+  var RASCUNHO = 6;
   function atualizarTexturas() {
     var base = prefixo();
     if (!GL || GL.base === base && GL.tex) return Promise.resolve(GL);
-    return Promise.all([pronta(plano), carregar(base + "-prof.webp"), carregar(base + "-mascara.webp")]).then(function (r) {
-      var gl = GL.gl;
-      if (GL.tex) GL.tex.forEach(function (t) { gl.deleteTexture(t); });
-      gl.activeTexture(gl.TEXTURE0);
-      var foto = textura(gl, r[0], "srgb");
-      gl.activeTexture(gl.TEXTURE1);
-      var prof = textura(gl, r[1], "dado");
-      gl.activeTexture(gl.TEXTURE2);
-      var masc = textura(gl, r[2], "mascara");
-      GL.tex = [foto, prof, masc];
-      try {
-        var w = 256, h = Math.round(256 * r[1].naturalHeight / r[1].naturalWidth);
-        var c2 = document.createElement("canvas");
-        c2.width = w;
-        c2.height = h;
-        var ctx = c2.getContext("2d", { willReadFrequently: true });
-        ctx.drawImage(r[1], 0, 0, w, h);
-        var dados = ctx.getImageData(0, 0, w, h).data;
-        var d = new Uint8Array(w * h);
-        for (var i = 0; i < w * h; i++) d[i] = dados[i * 4];
-        PROF = { w: w, h: h, d: d };
-      } catch (e) {
-        PROF = null;
-      }
-      GL.base = base;
-      // altura do horizonte e da borda da piscina em cada enquadramento (medidas no passe de máscara)
-      GL.vale = /mobile/.test(base) ? [0.448, 0.642] : [0.391, 0.712];
-      GL.larg = r[0].naturalWidth;
-      GL.alt = r[0].naturalHeight;
-      medir();
-      return GL;
+    if (GL.pedido && GL.pedido.base === base) return GL.pedido.promessa;
+    var pedido = { base: base };
+    GL.pedido = pedido;
+    pedido.promessa = Promise.all([bitmapDe(plano, OPC_DADO), bitmapDoArquivo(base + "-prof.webp"), bitmapDoArquivo(base + "-mascara.webp")]).then(function (r) {
+      // GL.larg/GL.alt são as medidas da <img> (com srcset, naturalWidth já vem dividido pela densidade escolhida:
+      // 1170w num celular de 390 px dá 390). O raio do desfoque sempre foi calculado com elas: o ImageBitmap tem os
+      // pixels de verdade e mudaria o desenho
+      var gl = GL.gl, novas = [], dims = [plano.naturalWidth || largura(r[0]), plano.naturalHeight || altura(r[0])];
+      return emTarefas([
+        function () { novas[0] = textura(gl, r[0], "srgb", RASCUNHO); fechar(r[0]); },
+        function () { novas[1] = textura(gl, r[1], "dado", RASCUNHO); },
+        function () { novas[2] = textura(gl, r[2], "mascara", RASCUNHO); fechar(r[2]); },
+        function () {
+          // a profundidade também fica na memória, em 256 px de largura, para o foco ir aonde o cursor clica
+          try {
+            var w = 256, h = Math.round(256 * altura(r[1]) / largura(r[1]));
+            var c2 = document.createElement("canvas");
+            c2.width = w;
+            c2.height = h;
+            var ctx = c2.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(r[1], 0, 0, w, h);
+            var dados = ctx.getImageData(0, 0, w, h).data;
+            var d = new Uint8Array(w * h);
+            for (var i = 0; i < w * h; i++) d[i] = dados[i * 4];
+            PROF = { w: w, h: h, d: d };
+          } catch (e) {
+            PROF = null;
+          }
+          fechar(r[1]);
+        }
+      ]).then(function () {
+        if (GL.pedido !== pedido) {
+          // outro enquadramento foi pedido no meio: estas texturas já nasceram velhas
+          novas.forEach(function (t) { gl.deleteTexture(t); });
+          return GL.pedido ? GL.pedido.promessa : GL;
+        }
+        GL.pedido = null;
+        if (GL.tex) GL.tex.forEach(function (t) { gl.deleteTexture(t); });
+        novas.forEach(function (t, i) {
+          gl.activeTexture(gl.TEXTURE0 + i);
+          gl.bindTexture(gl.TEXTURE_2D, t);
+        });
+        GL.tex = novas;
+        GL.base = base;
+        // altura do horizonte e da borda da piscina em cada enquadramento (medidas no passe de máscara)
+        GL.vale = /mobile/.test(base) ? [0.448, 0.642] : [0.391, 0.712];
+        GL.larg = dims[0];
+        GL.alt = dims[1];
+        medir();
+        return GL;
+      });
+    }, function (e) {
+      if (GL.pedido === pedido) GL.pedido = null;
+      throw e;
     });
+    return pedido.promessa;
   }
 
   // ------------------------------------------------------------ medidas (tudo relativo à área da imagem)
@@ -398,17 +508,18 @@
   }
 
   // ------------------------------------------------------------ teste de toque pela transparência das fotos
+  // a foto de cada pessoa é decodificada uma vez (fora da thread principal) e serve à máscara e à textura
   function prepararMascaras() {
     ORDEM.forEach(function (id) {
       var p = pessoas[id];
-      var fazer = function () {
-        var w = 96, h = Math.round(96 * p.img.naturalHeight / p.img.naturalWidth);
-        var c = document.createElement("canvas");
-        c.width = w;
-        c.height = h;
-        var ctx = c.getContext("2d", { willReadFrequently: true });
-        ctx.drawImage(p.img, 0, 0, w, h);
+      var fazer = function (im) {
         try {
+          var w = 96, h = Math.round(96 * altura(im) / largura(im));
+          var c = document.createElement("canvas");
+          c.width = w;
+          c.height = h;
+          var ctx = c.getContext("2d", { willReadFrequently: true });
+          ctx.drawImage(im, 0, 0, w, h);
           var dados = ctx.getImageData(0, 0, w, h).data;
           var a = new Uint8Array(w * h);
           for (var i = 0; i < w * h; i++) a[i] = dados[i * 4 + 3];
@@ -416,8 +527,12 @@
         } catch (e) {
           p.mascara = null;
         }
+        p.mascaraFeita = true;
+        liberarFonte(p);
       };
-      pronta(p.img).then(fazer, function () {});
+      p.fonte = bitmapDe(p.img, OPC_PESSOA);
+      // cada máscara numa tarefa própria, depois que a foto chegou decodificada
+      p.fonte.then(function (im) { setTimeout(function () { fazer(im); }, 0); }, function () {});
     });
   }
 
@@ -535,7 +650,7 @@
   var rectBuf = new Float32Array(12), escBuf = new Float32Array(3), blurBuf = new Float32Array(3), recuoBuf = new Float32Array(3);
 
   function desenhar(t) {
-    if (!GL || !GL.tex || !GL.pessoas) return;
+    if (!GL || !GL.u || !GL.tex || !GL.pessoas) return;
     var gl = GL.gl, u = GL.u, d = M.dpr;
     // a câmera respira: um passeio lento e pequeno, somado ao cursor
     var seg = t / 1000;
@@ -626,7 +741,8 @@
       // no toque não há cursor para descobrir o clique: a dica aparece uma vez sobre o resort
       setTimeout(function () {
         if (S.tocou || S.modo !== "trio") return;
-        mostrarDica("Toque no resort para vê-lo nítido", [M.w * 0.3, M.h * 0.5], true);
+        var texto = "Toque no resort para vê-lo nítido";
+        mostrarDica(texto, lugarDaDica(texto), true);
         setTimeout(function () { mostrarDica(null); }, 3600);
       }, 2600);
     }
@@ -669,17 +785,67 @@
       if (!D.texto || fixa) D.xy = xy.slice();
     }
     D.fixa = !!fixa;
-    if (texto === D.texto) return;
+    // dica fixa já nasce no lugar; com movimento reduzido o laço de quadros não roda e moverDica() nunca a levaria
+    // até ali (ela ficava no canto de cima, sobre a logo): vai direto para o ponto, sem seguir o cursor com atraso
+    if (reduz && xy) D.xy = xy.slice();
+    if (texto === D.texto) { if (texto && (fixa || reduz)) posDica(); return; }
     D.texto = texto;
     if (texto) dica.textContent = texto;
+    if (texto && (fixa || reduz)) posDica();
     dica.classList.toggle("visivel", !!texto);
+  }
+
+  // a dica nunca passa da borda direita da cena (no celular de 320px "Toque no resort…" saía cortada)
+  function posDica() {
+    var x = Math.min(D.xy[0] + 18, M.w - dica.offsetWidth - 8);
+    dica.style.transform = "translate3d(" + Math.max(8, x).toFixed(1) + "px," + (D.xy[1] + 20).toFixed(1) + "px,0)";
+  }
+
+  // onde a dica fixa do toque pode ficar: fora dos três rostos e de onde cada rótulo aparece durante o ciclo (o rótulo
+  // anda Ênio → Pablo → Nezio → Ênio enquanto ela está na tela). Procura do meio da cena para cima (o céu sobre o
+  // resort, entre o título e os rótulos); se não couber (celular baixo), do meio para baixo. Devolve o ponto no
+  // formato de mostrarDica() (posDica() soma 18 e 20)
+  function lugarDaDica(texto) {
+    var padrao = [M.w * 0.3, M.h * 0.5];
+    if (!dica) return padrao;
+    dica.textContent = texto;
+    var dw = dica.offsetWidth, dh = dica.offsetHeight, m = 6;
+    var bloqueios = [];
+    var rw = Math.max(rotulo.offsetWidth, Math.min(230, M.w - 20)), rh = rotulo.offsetHeight || 60;
+    var tetoTitulo = cabeca.offsetTop + cabeca.offsetHeight + 8;
+    ORDEM.forEach(function (id) {
+      var b = M.rects[id], f = pessoas[id].rosto;
+      bloqueios.push([b.x + f[0] * b.w, b.y + f[1] * b.h, b.x + f[2] * b.w, b.y + f[3] * b.h]);
+      // o rótulo de cada um, como posicionarCaixa() o põe (some quando não cabe abaixo do título)
+      var c = rosto(id), topo = c[1] - M.folga - rh;
+      if (topo >= tetoTitulo) {
+        var esq = c[0] + Math.max(10 - c[0], Math.min(0, M.w - 10 - (c[0] + rw)));
+        bloqueios.push([esq, topo, esq + rw, c[1] - M.folga]);
+      }
+    });
+    var livre = function (x, y) {
+      for (var i = 0; i < bloqueios.length; i++) {
+        var q = bloqueios[i];
+        if (x < q[2] + m && x + dw > q[0] - m && y < q[3] + m && y + dh > q[1] - m) return false;
+      }
+      return true;
+    };
+    var xs = [(M.w - dw) / 2, Math.max(8, Math.min(M.w - dw - 8, padrao[0] + 18))];
+    var y0 = padrao[1] + 20, piso = M.h - dh - 8, y, k;
+    var tentar = function (yy) {
+      for (k = 0; k < xs.length; k++) if (livre(xs[k], yy)) return [xs[k] - 18, yy - 20];
+      return null;
+    };
+    for (y = y0; y >= tetoTitulo; y -= 4) { var achou = tentar(y); if (achou) return achou; }
+    for (y = y0; y <= piso; y += 4) { var achou2 = tentar(y); if (achou2) return achou2; }
+    return padrao;
   }
 
   function moverDica(dt) {
     if (!dica || !D.texto) return;
     D.xy[0] = amortecer(D.xy[0], D.alvo[0], dt, 14);
     D.xy[1] = amortecer(D.xy[1], D.alvo[1], dt, 14);
-    dica.style.transform = "translate3d(" + (D.xy[0] + 18).toFixed(1) + "px," + (D.xy[1] + 20).toFixed(1) + "px,0)";
+    posDica();
   }
 
   // ------------------------------------------------------------ eventos

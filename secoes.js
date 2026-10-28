@@ -14,6 +14,115 @@
   function limita(v, a, b) { return Math.max(a, Math.min(b, v)); }
   var NS = "http://www.w3.org/2000/svg";
 
+  // ------------------------------------------------------------ sequência de quadros (obra e voo)
+  // Rede: no máximo REDE pedidos ao mesmo tempo, na ordem de prioridade dada; foco(i) passa à frente da fila os
+  // quadros a até RAIO do quadro atual. Os bytes de cada quadro ficam guardados (comprimidos) assim que chegam.
+  // Memória: só os quadros a até RAIO do atual ficam decodificados; os que saem são fechados e, se a rolagem voltar,
+  // decodificados de novo a partir dos bytes guardados, fora da thread principal (createImageBitmap). O quadro em uso
+  // na tela nunca é fechado: a tela nunca fica vazia.
+  function Sequencia(urls, ordem, aoMudar) {
+    var REDE = 6, DECOD = 4, RAIO = 12;
+    var n = urls.length, bytes = [], quadros = [], decodificando = [], fila = ordem.slice(), naRede = 0, nDecod = 0;
+    var centro = 0, emUso = {}, morta = false;
+    var temBitmap = typeof window.createImageBitmap === "function";
+
+    function decodificar(blob) {
+      if (temBitmap) {
+        return createImageBitmap(blob).then(function (bmp) {
+          return { im: bmp, w: bmp.width, h: bmp.height, fechar: function () { bmp.close(); } };
+        });
+      }
+      // sem createImageBitmap (Safari antigo): uma imagem do próprio blob, decodificada antes de entrar
+      return new Promise(function (ok, falha) {
+        var url = URL.createObjectURL(blob), im = new Image();
+        im.decoding = "async";
+        im.onload = function () {
+          var pronto = function () { ok({ im: im, w: im.naturalWidth, h: im.naturalHeight, fechar: function () { URL.revokeObjectURL(url); } }); };
+          if (im.decode) im.decode().then(pronto, pronto); else pronto();
+        };
+        im.onerror = function () { URL.revokeObjectURL(url); falha(); };
+        im.src = url;
+      });
+    }
+
+    function naJanela(i) { return Math.abs(i - centro) <= RAIO; }
+
+    // decodifica os quadros da janela que já chegaram, do mais perto para o mais longe; fecha os que saíram dela
+    function cuidarMemoria() {
+      if (morta) return;
+      for (var k = 0; k < n; k++) {
+        if (quadros[k] && !naJanela(k) && !emUso[k]) { quadros[k].fechar(); quadros[k] = null; }
+      }
+      for (var d = 0; d <= RAIO && nDecod < DECOD; d++) {
+        [centro - d, centro + d].forEach(function (i) {
+          if (i < 0 || i >= n || nDecod >= DECOD || !bytes[i] || quadros[i] || decodificando[i]) return;
+          decodificando[i] = true;
+          nDecod++;
+          decodificar(bytes[i]).then(function (q) {
+            decodificando[i] = false;
+            nDecod--;
+            if (morta || (!naJanela(i) && !emUso[i])) { q.fechar(); }
+            else { quadros[i] = q; aoMudar(i); }
+            cuidarMemoria();
+          }, function () { decodificando[i] = false; nDecod--; cuidarMemoria(); });
+        });
+      }
+    }
+
+    function puxar() {
+      while (!morta && naRede < REDE && fila.length) {
+        (function (i) {
+          naRede++;
+          // prioridade baixa: os quadros nunca passam na frente do resto da página (navegador sem suporte ignora)
+          fetch(urls[i], { priority: "low" }).then(function (r) {
+            if (!r.ok) throw new Error(r.status);
+            return r.blob();
+          }).then(function (b) {
+            bytes[i] = b;
+            if (naJanela(i)) cuidarMemoria();
+          }, function () {}).then(function () { naRede--; puxar(); });
+        })(fila.shift());
+      }
+    }
+
+    puxar();
+    return {
+      n: n,
+      // o quadro decodificado mais perto de i (ou null)
+      perto: function (i) {
+        for (var d = 0; d < n; d++) {
+          if (quadros[i - d]) return quadros[i - d];
+          if (quadros[i + d]) return quadros[i + d];
+        }
+        return null;
+      },
+      quadro: function (i) { return quadros[i] || null; },
+      indice: function (q) { return quadros.indexOf(q); },
+      // os quadros desenhados agora: não saem da memória enquanto estiverem na tela
+      usar: function (lista) {
+        emUso = {};
+        lista.forEach(function (q) { var k = quadros.indexOf(q); if (k >= 0) emUso[k] = 1; });
+      },
+      foco: function (f) {
+        var c = limita(Math.round(f), 0, n - 1);
+        if (c === centro) return;
+        centro = c;
+        // os que faltam perto do quadro atual passam à frente, do mais perto para o mais longe; o resto mantém a ordem
+        var perto = [], resto = [];
+        fila.forEach(function (i) { (naJanela(i) ? perto : resto).push(i); });
+        perto.sort(function (a, b) { return Math.abs(a - c) - Math.abs(b - c); });
+        fila = perto.concat(resto);
+        cuidarMemoria();
+      },
+      matar: function () {
+        morta = true;
+        fila = [];
+        quadros.forEach(function (q) { if (q) q.fechar(); });
+        quadros = [];
+      }
+    };
+  }
+
   // ------------------------------------------------------------ topo sólido e barra de compra fora do hero
   var topo = document.querySelector(".topo");
   var heroEl = document.querySelector(".hero");
@@ -147,15 +256,51 @@
       });
       mesa.style.setProperty("--fim", limita((p - 0.8) / 0.08, 0, 1).toFixed(3));
     };
+    // espaço que sobra para a planta no palco preso: a tela menos o topo, o cabeçalho da seção, a legenda e a barra de
+    // compra fixa embaixo (no celular ela fica na tela durante a mesa). Sem isso a mesa descia para baixo da barra
+    var palcoMesa = mesa.querySelector(".mesa__palco"), cabecaMesa = mesa.querySelector(".mesa__cabeca");
+    var medirMesa = function () {
+      var barraH = barra ? barra.offsetHeight : 0;
+      mesa.style.setProperty("--mesa-barra", barraH + "px");
+      var livre = palcoMesa.clientHeight - topo.offsetHeight - 14 - 22 - barraH - cabecaMesa.offsetHeight - 24 - 24;
+      mesa.style.setProperty("--mesa-livre", Math.floor(livre) + "px");
+      return livre;
+    };
+    // tela baixa demais: no celular (320x568, 360x740, 375x667) abaixo de 280px de planta os rótulos de baixo se
+    // encostam; em qualquer tela com menos de 560px de altura (notebook com zoom de 200%, celular deitado) o palco
+    // preso mostraria só uma faixa da mesa. Nesses casos a mesa fica parada, já completa, como sem movimento.
+    // Decidido de novo quando a largura muda (zoom do navegador, girar o celular); a barra de endereço do celular, que
+    // some e volta durante a rolagem, muda só a altura e não troca o modo no meio da leitura
+    var mesaViva = null, stMesa = null, larguraMesa = window.innerWidth;
+    var ajustarMesa = function () {
+      var quer = false;
+      if (anima) {
+        mesa.classList.add("mesa--viva");
+        var livre = medirMesa();
+        quer = window.innerHeight >= 560 && (largo() || livre >= 280);
+      }
+      mesa.classList.toggle("mesa--viva", quer);
+      if (quer === mesaViva) return;
+      mesaViva = quer;
+      if (quer) {
+        if (!stMesa) {
+          stMesa = ScrollTrigger.create({
+            trigger: mesa, start: "top top", end: "bottom bottom", scrub: true,
+            onUpdate: function (st) { pintarMesa(st.progress); }
+          });
+        } else stMesa.enable();
+        pintarMesa(stMesa.progress);
+      } else {
+        if (stMesa) stMesa.disable();
+        pintarMesa(1);
+      }
+    };
+    ajustarMesa();
     if (anima) {
-      mesa.classList.add("mesa--viva");
-      pintarMesa(0);
-      ScrollTrigger.create({
-        trigger: mesa, start: "top top", end: "bottom bottom", scrub: true,
-        onUpdate: function (st) { pintarMesa(st.progress); }
-      });
-    } else {
-      pintarMesa(1);
+      window.addEventListener("resize", function () {
+        if (window.innerWidth !== larguraMesa) { larguraMesa = window.innerWidth; ajustarMesa(); }
+        else if (mesaViva) medirMesa();
+      }, { passive: true });
     }
   }
 
@@ -170,7 +315,7 @@
     var frasesObra = obra.querySelectorAll(".obra__frase");
     var hojeObra = obra.querySelector(".obra__hoje");
     var MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-    var Q = { lista: [], imgs: [], conjunto: null, f: 0, zero: 0 };
+    var Q = { lista: [], seq: null, velha: null, conjunto: null, f: 0, zero: 0 };
     var INI = Date.UTC(2021, 5, 1), FIM = Date.UTC(2022, 3, 1);
 
     var dataDe = function (s) {
@@ -190,12 +335,12 @@
       var conj = largo() ? "d" : "m";
       if (conj !== Q.conjunto && Q.lista.length) {
         Q.conjunto = conj;
-        Q.imgs = [];
         carregarObra();
       }
       desenharObra(Q.f);
     };
 
+    var pedidoObra = 0, RAIO_REDESENHO = 13;
     var carregarObra = function () {
       // primeiro os quadros das pontas e de três em três: a rolagem rápida já tem o que mostrar
       var n = Q.lista.length, ordem = [], visto = {};
@@ -204,45 +349,41 @@
           if (!visto[i]) { visto[i] = 1; ordem.push(i); }
         });
       var conj = Q.conjunto;
-      ordem.forEach(function (i) {
-        var im = new Image();
-        im.decoding = "async";
-        im.onload = function () {
-          if (conj !== Q.conjunto) return;
-          Q.imgs[i] = im;
-          if (Math.abs(i - Q.f) < 2) desenharObra(Q.f);
-        };
-        im.src = "assets/obra/" + conj + "/" + String(i).padStart(2, "0") + ".webp";
+      var urls = Q.lista.map(function (_, i) { return "assets/obra/" + conj + "/" + String(i).padStart(2, "0") + ".webp"; });
+      // o conjunto anterior (troca celular/largo) fica na tela até o novo ter um quadro
+      if (Q.velha) Q.velha.matar();
+      Q.velha = Q.seq;
+      Q.seq = Sequencia(urls, ordem, function (i) {
+        // um quadro novo perto do atual: redesenha uma vez no próximo quadro de animação
+        if (Math.abs(i - Q.f) < RAIO_REDESENHO && !pedidoObra) {
+          pedidoObra = requestAnimationFrame(function () { pedidoObra = 0; desenharObra(Q.f); });
+        }
       });
+      Q.seq.foco(Q.f);
     };
 
-    var cobrir = function (im, alfa) {
+    var cobrir = function (q, alfa) {
       var cw = telaObra.width, ch = telaObra.height;
-      var esc = Math.max(cw / im.naturalWidth, ch / im.naturalHeight);
-      var w = im.naturalWidth * esc, h = im.naturalHeight * esc;
+      var esc = Math.max(cw / q.w, ch / q.h);
+      var w = q.w * esc, h = q.h * esc;
       ctxObra.globalAlpha = alfa;
-      ctxObra.drawImage(im, (cw - w) * (largo() ? 0.6 : 0.5), (ch - h) * 0.5, w, h);
-    };
-
-    var quadroPerto = function (i) {
-      // o quadro carregado mais perto, para nunca desenhar vazio
-      for (var d = 0; d < Q.lista.length; d++) {
-        if (Q.imgs[i - d]) return Q.imgs[i - d];
-        if (Q.imgs[i + d]) return Q.imgs[i + d];
-      }
-      return null;
+      ctxObra.drawImage(q.im, (cw - w) * (largo() ? 0.6 : 0.5), (ch - h) * 0.5, w, h);
     };
 
     var desenharObra = function (f) {
-      if (!Q.lista.length) return;
+      if (!Q.lista.length || !Q.seq) return;
       var i = Math.floor(f), t = f - i;
-      var a = quadroPerto(i);
+      // o quadro decodificado mais perto, para nunca desenhar vazio
+      var a = Q.seq.perto(i);
+      if (!a && Q.velha) { a = Q.velha.perto(i); if (!a) return; cobrir(a, 1); ctxObra.globalAlpha = 1; return; }
       if (!a) return;
+      if (Q.velha) { Q.velha.matar(); Q.velha = null; }
       cobrir(a, 1);
       // dissolução contínua: o quadro seguinte entra ao longo de todo o trecho, o que dilui o tremor entre quadros
-      var b = Q.imgs[i + 1];
+      var b = Q.seq.quadro(i + 1);
       if (t > 0.001 && b) cobrir(b, t);
       ctxObra.globalAlpha = 1;
+      Q.seq.usar(b ? [a, b] : [a]);
     };
 
     var faseAtual = null;
@@ -304,6 +445,7 @@
         trigger: obra, start: "top top", end: "bottom bottom", scrub: true,
         onUpdate: function (st) {
           Q.f = quadroDe(st.progress);
+          if (Q.seq) Q.seq.foco(Q.f);
           desenharObra(Q.f);
           marcarObra(Q.f);
         }
@@ -382,6 +524,8 @@
       contador.style.fontVariantNumeric = "tabular-nums";
       contador.textContent = antes;
     }
+    // aceso[i]: o estado com que a unidade i está pintada agora; dprU: a escala da tela ao pintar
+    var aceso = new Uint8Array(TOTAL), pintada = false, dprU = 1;
     function medirUnidades() {
       reservarContador();
       var w = unidades.clientWidth;
@@ -397,19 +541,51 @@
       unidades.width = Math.round(w * dpr);
       unidades.height = Math.round(h * dpr);
       uctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      desenharUnidades();
+      dprU = dpr;
+      // tamanho novo: a tela foi apagada, tudo é pintado de novo
+      desenharUnidades(true);
     }
-    function desenharUnidades() {
+    function posUnidade(i) {
+      var gd = grade, bloco = 10 * gd.cw + 9 * gd.g;
+      var b = Math.floor(i / 100), d = i % 100;
+      return [(b % gd.bx) * (bloco + gd.vao) + (d % 10) * (gd.cw + gd.g),
+        Math.floor(b / gd.bx) * (bloco + gd.vao) + Math.floor(d / 10) * (gd.cw + gd.g)];
+    }
+    function pintarUnidade(i) {
+      var p = posUnidade(i);
+      uctx.fillStyle = aceso[i] ? CORES[tom[i]] : VAZIO;
+      uctx.fillRect(p[0], p[1], grade.cw, grade.cw);
+    }
+    // repinta o bloco de 100 unidades como a pintura inteira faria: apaga só os pixels do bloco (os blocos ficam a 4px
+    // ou mais um do outro, nenhum pixel é dividido entre dois) e pinta as 100 na ordem de sempre. Dentro do bloco as
+    // bordas suavizadas das unidades dividem pixels (vão de 0,6px), por isso o bloco inteiro e não a unidade sozinha
+    function repintarBloco(b) {
+      var p = posUnidade(b * 100), lado = 10 * grade.cw + 9 * grade.g;
+      var x0 = Math.floor(p[0] * dprU) - 1, y0 = Math.floor(p[1] * dprU) - 1;
+      var x1 = Math.ceil((p[0] + lado) * dprU) + 1, y1 = Math.ceil((p[1] + lado) * dprU) + 1;
+      uctx.setTransform(1, 0, 0, 1, 0, 0);
+      uctx.clearRect(x0, y0, x1 - x0, y1 - y0);
+      uctx.setTransform(dprU, 0, 0, dprU, 0, 0);
+      for (var i = b * 100; i < b * 100 + 100; i++) pintarUnidade(i);
+    }
+    function desenharUnidades(tudo) {
       var gd = grade;
       if (!gd.cw) return;
-      uctx.clearRect(0, 0, unidades.width, unidades.height);
-      var bloco = 10 * gd.cw + 9 * gd.g;
-      for (var i = 0; i < TOTAL; i++) {
-        var b = Math.floor(i / 100), d = i % 100;
-        var x = (b % gd.bx) * (bloco + gd.vao) + (d % 10) * (gd.cw + gd.g);
-        var y = Math.floor(b / gd.bx) * (bloco + gd.vao) + Math.floor(d / 10) * (gd.cw + gd.g);
-        uctx.fillStyle = quando[i] < feito ? CORES[tom[i]] : VAZIO;
-        uctx.fillRect(x, y, gd.cw, gd.cw);
+      if (tudo || !pintada) {
+        uctx.clearRect(0, 0, unidades.width, unidades.height);
+        for (var i = 0; i < TOTAL; i++) {
+          aceso[i] = quando[i] < feito ? 1 : 0;
+          pintarUnidade(i);
+        }
+        pintada = true;
+      } else {
+        // só os blocos com alguma unidade que mudou desde a última pintura
+        var blocoMudou = {};
+        for (var k = 0; k < TOTAL; k++) {
+          var v = quando[k] < feito ? 1 : 0;
+          if (v !== aceso[k]) { aceso[k] = v; blocoMudou[Math.floor(k / 100)] = 1; }
+        }
+        for (var bm in blocoMudou) repintarBloco(+bm);
       }
       if (contador) contador.textContent = Math.round(TOTAL * feito).toLocaleString("pt-BR");
     }
@@ -431,6 +607,9 @@
   (function () {
     var voo = document.getElementById("voo");
     if (!voo || !anima || !window.fetch) return;
+    // a altura final (palco preso) entra desde já: a seção não muda de tamanho quando o quadro 0 chega (sem salto de
+    // layout); até lá o pôster cobre o quadro e a tela, ainda vazia, é transparente
+    voo.classList.add("voo--vivo");
     var quadro = voo.querySelector(".voo__quadro");
     var tela = voo.querySelector(".voo__tela");
     var ctx = tela.getContext("2d");
@@ -438,7 +617,7 @@
     var textoVoo = voo.querySelector(".voo__texto");
     // em que trecho do voo cada marca aparece (fração da rolagem)
     var JANELA = { lago: [0.03, 0.4], alas: [0.28, 0.7], piscina: [0.72, 1.01] };
-    var pontos = null, imgs = [], N = 0, prog = 0, pedido = 0, ultimo = "", vivo = false, pasta = "";
+    var pontos = null, seq = null, N = 0, prog = 0, pedido = 0, ultimo = "", pasta = "";
     // os quadros do celular são o recorte em pé do centro do quadro (x de 450 a 1150 em 1600): as marcas também
     var RECORTE_M = [450 / 1600, 700 / 1600], recorte = [0, 1];
     function suave(a, b, t) { t = limita((t - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -457,26 +636,16 @@
           for (var i = 0; i < N; i += passo) if (ordem.indexOf(i) < 0) ordem.push(i);
           if (passo === 1) break;
         }
-        ordem.forEach(function (i) {
-          var im = new Image();
-          im.decoding = "async";
-          im.onload = function () {
-            imgs[i] = im;
-            if (!vivo && i === 0) { vivo = true; voo.classList.add("voo--vivo"); ScrollTrigger.refresh(); }
-            pedir();
-          };
-          im.src = nome(i);
-        });
-      }).catch(function () {});
-    }
-
-    // o quadro carregado mais perto do pedido
-    function perto(i) {
-      for (var d = 0; d < N; d++) {
-        if (imgs[i - d]) return i - d;
-        if (imgs[i + d]) return i + d;
-      }
-      return -1;
+        var urls = [];
+        for (var k = 0; k < N; k++) urls.push(nome(k));
+        seq = Sequencia(urls, ordem, pedir);
+        seq.foco(prog * (N - 1));
+        pedir();
+      }).catch(function () {
+        // sem a lista de pontos o voo não anda: volta ao pôster parado
+        voo.classList.remove("voo--vivo");
+        ScrollTrigger.refresh();
+      });
     }
 
     function pedir() {
@@ -485,7 +654,7 @@
 
     function desenhar() {
       pedido = 0;
-      if (!N) return;
+      if (!N || !seq) return;
       var w = quadro.clientWidth, h = quadro.clientHeight;
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       if (tela.width !== Math.round(w * dpr) || tela.height !== Math.round(h * dpr)) {
@@ -494,17 +663,19 @@
         ultimo = "";
       }
       var alvo = Math.round(prog * (N - 1));
-      var i = perto(alvo);
-      if (i < 0) return;
-      var im = imgs[i];
+      // o quadro decodificado mais perto do pedido
+      var q = seq.perto(alvo);
+      if (!q) return;
+      var i = seq.indice(q), im = q.im, iw = q.w, ih = q.h;
+      seq.usar([q]);
       // cobre o quadro como object-fit: cover; no meio do voo (vista aérea) amplia até 12% em torno de um ponto
       // abaixo e à direita do centro, e a névoa do topo desce: a borda da cena extraída fica fora do quadro
       var bruma = suave(0.3, 0.42, prog) * (1 - suave(0.7, 0.8, prog));
       var z = 1 + 0.12 * bruma;
-      var esc = Math.max(w / im.naturalWidth, h / im.naturalHeight) * z;
-      var dw = im.naturalWidth * esc, dh = im.naturalHeight * esc;
+      var esc = Math.max(w / iw, h / ih) * z;
+      var dw = iw * esc, dh = ih * esc;
       var fx = w * (0.5 + 0.12 * bruma), fy = h * (0.5 + 0.14 * bruma);
-      var ox = fx - (fx - (w - im.naturalWidth * esc / z) / 2) * z, oy = fy - (fy - (h - im.naturalHeight * esc / z) / 2) * z;
+      var ox = fx - (fx - (w - iw * esc / z) / 2) * z, oy = fy - (fy - (h - ih * esc / z) / 2) * z;
       var chave = i + ":" + z.toFixed(3);
       if (chave !== ultimo) {
         ctx.drawImage(im, ox * dpr, oy * dpr, dw * dpr, dh * dpr);
@@ -537,7 +708,11 @@
       trigger: voo,
       start: "top top",
       end: "bottom bottom",
-      onUpdate: function (s) { prog = s.progress; pedir(); }
+      onUpdate: function (s) {
+        prog = s.progress;
+        if (seq) seq.foco(prog * (N - 1));
+        pedir();
+      }
     });
     window.addEventListener("resize", pedir, { passive: true });
   })();
@@ -581,7 +756,10 @@
   // ------------------------------------------------------------ edição anterior: o filme toca quando aparece
   var video = document.querySelector(".filme__video");
   if (video) {
-    var som = document.querySelector(".filme__som");
+    var som = document.querySelector(".filme__som:not(.filme__pausa)");
+    var pausa = document.querySelector(".filme__pausa");
+    // a pessoa pausou: a rolagem não volta a tocar o filme até ela pedir
+    var pausouAMao = false;
     var carregado = false;
     function carregar() {
       if (carregado) return;
@@ -600,7 +778,7 @@
     } else if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (ent) {
         ent.forEach(function (e) {
-          if (e.isIntersecting && e.intersectionRatio > 0.35) tocar();
+          if (e.isIntersecting && e.intersectionRatio > 0.35) { if (!pausouAMao) tocar(); }
           else if (!video.paused) video.pause();
         });
       }, { threshold: [0, 0.35, 0.7] }).observe(video);
@@ -614,8 +792,23 @@
       video.muted = !ligar;
       som.setAttribute("aria-pressed", ligar ? "true" : "false");
       som.querySelector(".filme__texto").textContent = ligar ? "Sem som" : "Ouvir";
-      if (ligar) tocar();
+      if (ligar) { pausouAMao = false; tocar(); }
     });
+    if (pausa) {
+      // o ícone e o nome seguem o estado real do vídeo (tocar pela rolagem, pelo "Ouvir" ou pelos controles nativos)
+      var marcarPausa = function () {
+        var parado = video.paused;
+        pausa.dataset.estado = parado ? "parado" : "tocando";
+        pausa.setAttribute("aria-label", parado ? "Tocar o filme" : "Pausar o filme");
+      };
+      video.addEventListener("play", marcarPausa);
+      video.addEventListener("pause", marcarPausa);
+      pausa.addEventListener("click", function () {
+        if (video.paused) { pausouAMao = false; tocar(); }
+        else { pausouAMao = true; video.pause(); }
+      });
+      marcarPausa();
+    }
   }
 
   // ------------------------------------------------------------ abas acessíveis (setas do teclado trocam a aba)

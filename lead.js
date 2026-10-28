@@ -28,6 +28,7 @@
   var listaEmail = document.getElementById("acesso-dominios");
   var dica = dialogo.querySelector(".acesso__dica");
   var origem = null, ingresso = "", gatilho = null;
+  var enviando = false, jaEnviado = false;
 
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -102,9 +103,14 @@
     ativo = li || null;
     if (ativo) {
       ativo.classList.add("ativo");
+      // a busca (teclado) e a lista (celular, onde o foco vai para ela) anunciam a opção ativa
       busca.setAttribute("aria-activedescendant", ativo.id);
+      ul.setAttribute("aria-activedescendant", ativo.id);
       ativo.scrollIntoView({ block: "nearest" });
-    } else busca.removeAttribute("aria-activedescendant");
+    } else {
+      busca.removeAttribute("aria-activedescendant");
+      ul.removeAttribute("aria-activedescendant");
+    }
   }
   function filtrar() {
     var q = semAcento(busca.value.trim()), n = q.replace(/\D/g, "");
@@ -119,6 +125,7 @@
   function abrirLista() {
     lista.hidden = false;
     botaoPais.setAttribute("aria-expanded", "true");
+    busca.setAttribute("aria-expanded", "true");
     busca.value = "";
     filtrar();
     marcarAtivo(pais.li);
@@ -129,6 +136,7 @@
     if (lista.hidden) return;
     lista.hidden = true;
     botaoPais.setAttribute("aria-expanded", "false");
+    busca.setAttribute("aria-expanded", "false");
     if (foca) botaoPais.focus({ preventScroll: true });
   }
   function escolher(p) {
@@ -166,10 +174,16 @@
     // vindo da escolha do nível de acesso, o pop-up já sabe qual ingresso a pessoa estava olhando
     var aba = link.closest("#ingressos") && document.querySelector('.chave[aria-selected="true"]');
     ingresso = aba ? aba.dataset.ingresso : "";
-    dialogo.classList.remove("enviado", "falha");
+    // depois de um envio com sucesso o pop-up reabre na confirmação: o mesmo lead não é enviado duas vezes
+    dialogo.classList.remove("falha");
+    if (!jaEnviado) dialogo.classList.remove("enviado");
     fecharLista(false);
     dialogo.showModal();
     document.documentElement.classList.add("acesso-aberto");
+    if (jaEnviado) {
+      setTimeout(function () { dialogo.querySelector(".acesso__passo--fim .acesso__titulo").focus({ preventScroll: true }); }, 60);
+      return;
+    }
     // o primeiro campo vazio recebe o foco (o navegador costuma ter o nome guardado)
     var vazio = [campoNome, campoTelefone, campoEmail].filter(function (c) { return !c.value; })[0] || campoNome;
     setTimeout(function () { vazio.focus(); }, 60);
@@ -205,7 +219,9 @@
     fechar();
   });
   dialogo.querySelector(".acesso__voltar").addEventListener("click", fechar);
-  dialogo.querySelector(".acesso__tentar").addEventListener("click", function () {
+  var tentar = dialogo.querySelector(".acesso__tentar");
+  tentar.addEventListener("click", function () {
+    if (enviando) return;
     dialogo.classList.remove("falha");
     mandar();
   });
@@ -240,9 +256,33 @@
       if (d.length > 2) f = "(" + d.slice(0, 2) + ") " + d.slice(2);
       if (d.length > 6) f = "(" + d.slice(0, 2) + ") " + d.slice(2, d.length - 4) + "-" + d.slice(d.length - 4);
       campoTelefone.value = f;
+    } else if (pais.iso === "US") {
+      // EUA e Canadá (+1): (415) 555-0100; o número nacional nunca começa com 1
+      if (d.length === 11 && d.charAt(0) === "1") d = d.slice(1);
+      d = d.slice(0, 10);
+      var u = d;
+      if (d.length > 3) u = "(" + d.slice(0, 3) + ") " + d.slice(3);
+      if (d.length > 6) u = "(" + d.slice(0, 3) + ") " + d.slice(3, 6) + "-" + d.slice(6);
+      campoTelefone.value = u;
     } else {
-      campoTelefone.value = d.slice(0, 14).replace(/(\d{3})(?=\d)/g, "$1 ");
+      // Reino Unido, França e Alemanha discam um 0 antes do número dentro do país; com o código do país ele cai
+      if (TRONCO[pais.iso] && d.charAt(0) === "0") d = d.slice(1);
+      campoTelefone.value = agrupar(d.slice(0, 14), GRUPOS[pais.iso] || GRUPOS_3);
     }
+  }
+
+  // tamanhos dos grupos de dígitos do número nacional; o último grupo aceita o que sobrar. Os outros países seguem em grupos de 3
+  var GRUPOS = { PT: [3, 3, 3], ES: [3, 3, 3], GB: [4, 6], FR: [1, 2, 2, 2, 2], IT: [3, 3, 4], DE: [3, 4, 4] };
+  var GRUPOS_3 = [3, 3, 3, 3, 3];
+  var TRONCO = { GB: 1, FR: 1, DE: 1 };
+  function agrupar(d, grupos) {
+    var partes = [], i = 0;
+    for (var g = 0; g < grupos.length && i < d.length; g++) {
+      var ultimo = g === grupos.length - 1;
+      partes.push(ultimo ? d.slice(i) : d.slice(i, i + grupos[g]));
+      i += grupos[g];
+    }
+    return partes.join(" ");
   }
 
   campoTelefone.addEventListener("input", function () {
@@ -308,12 +348,16 @@
   function marcarErro(campo, erro) {
     campo.closest(".acesso__campo").classList.toggle("erro", erro);
     campo.setAttribute("aria-invalid", erro ? "true" : "false");
+    // o leitor de tela só ganha a descrição quando o erro está à vista (o texto escondido ainda seria lido)
+    var idErro = campo === campoTelefone ? "acesso-erro-tel" : "acesso-erro-" + campo.name;
+    if (erro) campo.setAttribute("aria-describedby", idErro); else campo.removeAttribute("aria-describedby");
   }
 
   // ------------------------------------------------------------ enviar: lead para o sistema, conversa no WhatsApp
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     if (form.elements.site.value) return; // campo escondido: só robô preenche
+    if (enviando || jaEnviado) return;
     var erros = [];
     if (partesNome().length < 2) erros.push(campoNome);
     if (!validoTelefone()) erros.push(campoTelefone);
@@ -357,16 +401,22 @@
     return fetch(WEBHOOK, { method: "POST", mode: "no-cors", keepalive: true, headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: JSON.stringify(corpo) });
   }
   function mandar() {
+    if (enviando) return;
+    enviando = true;
     enviar.disabled = true;
+    tentar.disabled = true;
     enviarTexto.textContent = "Enviando…";
     enviarLead(ultimoLead).then(function () {
       numeroFinal.textContent = ultimoLead.telefone;
+      jaEnviado = true;
       dialogo.classList.add("enviado");
       dialogo.querySelector(".acesso__passo--fim .acesso__titulo").focus({ preventScroll: true });
     }, function () {
       dialogo.classList.add("falha");
       dialogo.querySelector(".acesso__passo--falha .acesso__titulo").focus({ preventScroll: true });
     }).then(function () {
+      enviando = false;
+      tentar.disabled = false;
       enviar.disabled = false;
       enviarTexto.textContent = "Garantir meu acesso";
     });

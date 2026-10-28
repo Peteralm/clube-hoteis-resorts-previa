@@ -36,9 +36,15 @@
   <link rel="preload" as="font" href="assets/fonts/proza-libre-regular.woff2" type="font/woff2" crossorigin>
   <link rel="preload" as="image" href="assets/cena/mobile-780.webp" imagesrcset="assets/cena/mobile-780.webp 780w, assets/cena/mobile-1170.webp 1170w" imagesizes="100vw" media="not all and (min-width: 900px) and (min-aspect-ratio: 1/1)" fetchpriority="high">
   <link rel="preload" as="image" href="assets/cena/desktop-1600.webp" imagesrcset="assets/cena/desktop-1600.webp 1600w, assets/cena/desktop-2560.webp 2560w" imagesizes="100vw" media="(min-width: 900px) and (min-aspect-ratio: 1/1)" fetchpriority="high">
-  <link rel="stylesheet" href="novo.css?v=261026t">
-  <link rel="stylesheet" href="secoes.css?v=261026t">
-  <link rel="stylesheet" href="lead.css?v=261026t">
+  <!-- profundidade e máscara da cena (só o WebGL do hero.js usa: sem movimento reduzido), no mesmo enquadramento da foto
+       acima. as="fetch" + crossorigin casa com o fetch() do hero.js, que decodifica fora da thread principal -->
+  <link rel="preload" as="fetch" href="assets/cena/mobile-prof.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (not ((min-width: 900px) and (min-aspect-ratio: 1/1)))">
+  <link rel="preload" as="fetch" href="assets/cena/mobile-mascara.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (not ((min-width: 900px) and (min-aspect-ratio: 1/1)))">
+  <link rel="preload" as="fetch" href="assets/cena/desktop-prof.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-aspect-ratio: 1/1)">
+  <link rel="preload" as="fetch" href="assets/cena/desktop-mascara.webp" crossorigin media="(prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-aspect-ratio: 1/1)">
+  <link rel="stylesheet" href="novo.css?v=261027a">
+  <link rel="stylesheet" href="secoes.css?v=261027a">
+  <link rel="stylesheet" href="lead.css?v=261027a">
   <script>document.documentElement.classList.replace("no-js", "js");</script>
   <script type="application/ld+json">
   {
@@ -398,6 +404,7 @@
         <figure class="filme">
           <video class="filme__video" muted playsinline loop preload="none" poster="assets/edicao/aftermovie-poster.jpg" data-src-largo="assets/edicao/aftermovie.mp4" data-src-curto="assets/edicao/aftermovie-360.mp4" aria-label="Aftermovie da edição anterior do Clube"></video>
           <div class="filme__barra">
+            <button class="filme__som filme__pausa" type="button" aria-label="Tocar o filme" data-estado="parado"><span class="filme__pausa-icone" aria-hidden="true"></span></button>
             <button class="filme__som" type="button" aria-pressed="false"><span class="filme__icone" aria-hidden="true"></span><span class="filme__texto">Ouvir</span></button>
             <figcaption>Aftermovie da edição anterior</figcaption>
             <a class="filme__link" href="https://www.youtube.com/watch?v=mxqCxFAPjVk" rel="noopener" target="_blank">Ver no YouTube</a>
@@ -677,11 +684,11 @@
         <p class="acesso__texto">Deixe seu contato e um dos nossos especialistas fala com você pelo WhatsApp para confirmar o seu ingresso.</p>
 
         <form class="acesso__form" novalidate>
-          <label class="acesso__campo">
-            <span>Nome completo</span>
-            <input name="nome" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Seu nome e sobrenome" required>
-            <em class="acesso__erro">Escreva nome e sobrenome</em>
-          </label>
+          <div class="acesso__campo">
+            <label for="acesso-nome">Nome completo</label>
+            <input id="acesso-nome" name="nome" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Seu nome e sobrenome" required>
+            <em class="acesso__erro" id="acesso-erro-nome">Escreva nome e sobrenome</em>
+          </div>
           <div class="acesso__campo acesso__campo--tel">
             <label for="acesso-tel">WhatsApp</label>
             <div class="acesso__tel">
@@ -693,16 +700,16 @@
               <input id="acesso-tel" name="telefone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(11) 91234-5678" enterkeyhint="next" required>
             </div>
             <div class="acesso__lista" id="acesso-paises" hidden>
-              <input class="acesso__busca" type="search" placeholder="Buscar país ou código" aria-label="Buscar país" autocomplete="off" spellcheck="false">
-              <ul role="listbox" aria-label="Países"></ul>
+              <input class="acesso__busca" type="search" role="combobox" aria-haspopup="listbox" aria-autocomplete="list" aria-expanded="false" aria-controls="acesso-paises-lista" placeholder="Buscar país ou código" aria-label="Buscar país" autocomplete="off" spellcheck="false">
+              <ul role="listbox" id="acesso-paises-lista" aria-label="Países"></ul>
             </div>
-            <em class="acesso__erro">Confira o número, com DDD</em>
+            <em class="acesso__erro" id="acesso-erro-tel">Confira o número, com DDD</em>
           </div>
-          <label class="acesso__campo">
-            <span>E-mail</span>
-            <input name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" list="acesso-dominios" placeholder="seu@email.com" required>
-            <em class="acesso__erro">Confira o e-mail</em>
-          </label>
+          <div class="acesso__campo">
+            <label for="acesso-email">E-mail</label>
+            <input id="acesso-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" list="acesso-dominios" placeholder="seu@email.com" required>
+            <em class="acesso__erro" id="acesso-erro-email">Confira o e-mail</em>
+          </div>
           <datalist id="acesso-dominios"></datalist>
           <button class="acesso__dica" type="button" hidden>Você quis dizer <b></b>?</button>
           <label class="acesso__isca" aria-hidden="true">Site <input name="site" type="text" tabindex="-1" autocomplete="off"></label>
@@ -732,8 +739,8 @@
   <!-- o GSAP antes do hero: a cortina de abertura usa a mesma biblioteca das seções -->
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
-  <script src="hero.js?v=261026t" defer></script>
-  <script src="secoes.js?v=261026t" defer></script>
-  <script src="lead.js?v=261026t" defer></script>
+  <script src="hero.js?v=261027a" defer></script>
+  <script src="secoes.js?v=261027a" defer></script>
+  <script src="lead.js?v=261027a" defer></script>
 </body>
 </html>
