@@ -168,6 +168,28 @@
     if (!lista.hidden && !lista.contains(e.target) && !botaoPais.contains(e.target)) fecharLista(false);
   });
 
+  // ------------------------------------------------------------ tráfego pago
+  // Pixel da Meta, GA4 e Tag Manager só existem no domínio oficial (modelo.njk); fora dele, as chamadas não fazem nada.
+  // "inicio": abriu o cadastro (InitiateCheckout, uma vez por visita). "lead": o cadastro chegou ao Clint (Lead).
+  var NOME_EVENTO = "Clube de Negócios de Hotéis & Resorts", iniciou = false;
+  function rastrear(qual) {
+    var dados = { content_name: NOME_EVENTO, content_category: ingresso || "geral" };
+    var dl = (window.dataLayer = window.dataLayer || []);
+    try {
+      if (qual === "inicio") {
+        if (iniciou) return;
+        iniciou = true;
+        if (window.fbq) fbq("track", "InitiateCheckout", dados);
+        if (window.gtag) gtag("event", "begin_checkout", { item_category: dados.content_category });
+        dl.push({ event: "cadastro_aberto", ingresso: dados.content_category });
+      } else {
+        if (window.fbq) fbq("track", "Lead", dados);
+        if (window.gtag) gtag("event", "generate_lead", { item_category: dados.content_category });
+        dl.push({ event: "lead_enviado", ingresso: dados.content_category });
+      }
+    } catch (e) { /* rastreamento nunca atrapalha o cadastro */ }
+  }
+
   // ------------------------------------------------------------ abrir e fechar
   function abrir(link) {
     gatilho = link;
@@ -180,6 +202,7 @@
     if (!jaEnviado) dialogo.classList.remove("enviado");
     fecharLista(false);
     dialogo.showModal();
+    if (!jaEnviado) rastrear("inicio");
     document.documentElement.classList.add("acesso-aberto");
     if (jaEnviado) {
       setTimeout(function () { dialogo.querySelector(".acesso__passo--fim .acesso__titulo").focus({ preventScroll: true }); }, 60);
@@ -416,8 +439,7 @@
     enviarLead(ultimoLead).then(function () {
       numeroFinal.textContent = ultimoLead.telefone;
       jaEnviado = true;
-      // conversão para o Tag Manager do cliente (sem dados pessoais)
-      (window.dataLayer = window.dataLayer || []).push({ event: "lead_enviado" });
+      rastrear("lead");
       dialogo.classList.add("enviado");
       dialogo.querySelector(".acesso__passo--fim .acesso__titulo").focus({ preventScroll: true });
     }, function () {

@@ -27,12 +27,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {%- if not edicao %}
-  <!-- Google Tag Manager (pedido do cliente). Só no domínio oficial: a prévia do GitHub e o painel não contam visitas -->
+  <!-- Rastreamento do tráfego pago, o mesmo do site do Ênio (pedido do cliente): Tag Manager, Pixel da Meta e tag do Google
+       (GA4 do Site Kit). Só no domínio oficial: a prévia do GitHub e o painel não contam visitas nem conversões.
+       Os eventos de conversão saem de lead.js (InitiateCheckout ao abrir o cadastro, Lead quando ele chega ao Clint). -->
   <script>
     if (/(^|\.)enioalmeida\.com\.br$/.test(location.hostname)) {
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
       j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
       })(window,document,'script','dataLayer','GTM-583MRBGS');
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)
+      }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1867167943856509');
+      fbq('track', 'PageView');
+      window.gtag = function(){dataLayer.push(arguments);};
+      (function(d){var t=d.createElement('script');t.async=true;t.src='https://www.googletagmanager.com/gtag/js?id=GT-PHXZX6M7';d.head.appendChild(t);})(document);
+      gtag('js', new Date());
+      gtag('set', 'linker', {domains: ['enioalmeida.com.br']});
+      gtag('config', 'GT-PHXZX6M7');
     }
   </script>
 {%- endif %}
