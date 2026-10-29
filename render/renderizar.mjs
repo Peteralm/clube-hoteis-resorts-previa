@@ -18,7 +18,7 @@
 //   aoUsarMidia função chamada com cada arquivo do bucket que o HTML usa ("slug/nome-800.webp"); o build baixa esses.
 //   validar     true (padrão): valida antes de renderizar e lança ErroDados com a lista de problemas.
 
-export const VERSAO_ARQUIVOS = "261028c"; // cache dos links CSS/JS (?v=): o orquestrador troca aqui no fim da rodada
+export const VERSAO_ARQUIVOS = "261029a"; // cache dos links CSS/JS (?v=): o orquestrador troca aqui no fim da rodada
 export const MIDIA_URL = "https://xfylbdxeciujemyavbaq.supabase.co/storage/v1/object/public/midia/";
 export const NUNJUCKS_URL = "https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js";
 export const NUNJUCKS_SRI = "sha384-ZNWDztJihcuTdvvOj/69bJWcalk3vWhHhurVe78xxAbMM8A8rmHY5+eTDWIjWC7Q";

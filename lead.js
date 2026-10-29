@@ -416,6 +416,8 @@
     enviarLead(ultimoLead).then(function () {
       numeroFinal.textContent = ultimoLead.telefone;
       jaEnviado = true;
+      // conversão para o Tag Manager do cliente (sem dados pessoais)
+      (window.dataLayer = window.dataLayer || []).push({ event: "lead_enviado" });
       dialogo.classList.add("enviado");
       dialogo.querySelector(".acesso__passo--fim .acesso__titulo").focus({ preventScroll: true });
     }, function () {
