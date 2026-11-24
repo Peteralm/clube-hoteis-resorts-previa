@@ -231,6 +231,13 @@
       "x-ordem": 39,
       "additionalProperties": false,
       "properties": {
+        "mesmo_local": {
+          "type": "boolean",
+          "title": "O mesmo local nos dois dias",
+          "x-widget": "sim-nao",
+          "x-ordem": 20,
+          "description": "Ligado: os dois dias usam o local do Dia 1, o mapa mostra um ponto só e a seção do voo até o resort sai da página."
+        },
         "dias": {
           "type": "array",
           "title": "Os dois dias",

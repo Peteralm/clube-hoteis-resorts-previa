@@ -315,7 +315,20 @@ function jsonld(obj) {
 }
 
 // ------------------------------------------------------------------ contexto do modelo
+// "o mesmo local nos dois dias": os dias depois do primeiro herdam o lugar do Dia 1 (o que estiver guardado neles fica
+// de lado, para voltar se a chave for desligada); data, chegada, agenda e foto continuam de cada dia
+const CAMPOS_DO_LOCAL = ["local", "artigo", "endereco", "cidade", "localidade", "uf", "busca_mapa", "latitude", "longitude"];
+function comLocalUnico(dados) {
+  if (dados.datas.mesmo_local !== true) return dados;
+  const d = structuredClone(dados);
+  const primeiro = d.datas.dias[0];
+  for (const dia of d.datas.dias.slice(1)) for (const k of CAMPOS_DO_LOCAL) if (k in primeiro) dia[k] = primeiro[k];
+  return d;
+}
+
 function contexto(dados, opcoes) {
+  const mesmoLocal = dados.datas.mesmo_local === true;
+  dados = comLocalUnico(dados);
   const midia = criaMidia(opcoes);
   const diasIso = dados.datas.dias.map((x) => dataIso(x.data));
   const a = diasIso[0], b = diasIso[diasIso.length - 1];
@@ -349,7 +362,10 @@ function contexto(dados, opcoes) {
     };
   });
   const d1 = dias[0], d2 = dias[dias.length - 1];
-  const mapaIframe = esc(`https://maps.google.com/maps?saddr=${d1.busca_iframe}&daddr=${d2.busca_iframe}&z=10&output=embed&hl=pt-BR`);
+  // um local só: o mapa mostra o ponto, sem trajeto
+  const mapaIframe = esc(mesmoLocal
+    ? `https://maps.google.com/maps?q=${d1.busca_iframe}&z=15&output=embed&hl=pt-BR`
+    : `https://maps.google.com/maps?saddr=${d1.busca_iframe}&daddr=${d2.busca_iframe}&z=10&output=embed&hl=pt-BR`);
 
   const c = e.datas.dias.map((x) => x.cidade), ufs = e.datas.dias.map((x) => x.uf);
   const cU = c[c.length - 1], ufU = ufs[ufs.length - 1];
@@ -367,7 +383,7 @@ function contexto(dados, opcoes) {
     description: t.hero.titulo, startDate: isoDe(a), endDate: isoDe(b),
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode", inLanguage: "pt-BR",
     url: "https://DOMINIO-A-DEFINIR/", image: ["https://DOMINIO-A-DEFINIR/" + seoImagem],
-    location: cru.datas.dias.map((x) => ({
+    location: (mesmoLocal ? cru.datas.dias.slice(0, 1) : cru.datas.dias).map((x) => ({
       "@type": "Place", name: x.local,
       address: { "@type": "PostalAddress", streetAddress: x.endereco, addressLocality: x.localidade, addressRegion: x.uf, addressCountry: "BR" },
       geo: { "@type": "GeoCoordinates", latitude: x.latitude, longitude: x.longitude },
@@ -386,7 +402,7 @@ function contexto(dados, opcoes) {
   const at = (nome) => (valor) => (ed ? ` ${nome}="${esc(valor)}"` : "");
 
   return {
-    d: e, cru, dias, quando_html: quandoHtml, marcas, cidades, trajeto, mapa_iframe: mapaIframe,
+    d: e, cru, dias, quando_html: quandoHtml, marcas, cidades, trajeto, mapa_iframe: mapaIframe, mesmo_local: mesmoLocal,
     jsonld: ld, dados_js: dadosJs, v: VERSAO_ARQUIVOS, seo_imagem: seoImagem, ano: a.getUTCFullYear(),
     img: midia.imagem, video: midia.video, foco: focoCss, minutos_br: minutosBr, milhar,
     edicao: ed,

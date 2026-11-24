@@ -362,9 +362,24 @@ export function criarAbaEvento(ctx) {
           texto(`datas.dias.${i}.agenda.${k}.ato`, { rotulo: "O que acontece" }))),
         h("p", { class: "ev-campo__ajuda", text: "Para pôr ou tirar um horário da agenda, use a aba Página." }))));
 
-    const cLocais = cartao("Locais", "Onde acontece cada dia.",
-      ...dias.map((dia, i) => h("div", { class: "ev-grupo" },
-        h("h3", { class: "ev-grupo__titulo", text: `Dia ${i + 1}` }),
+    // "o mesmo local nos dois dias": só o Dia 1 tem endereço; o site copia para os outros dias e tira o voo até o resort
+    const mesmo = obter(d, "datas.mesmo_local") === true;
+    const escolhaLocal = (valor, texto) => {
+      const b = h("button", { type: "button", class: "ficha", "aria-pressed": String(mesmo === valor), text: texto });
+      b.addEventListener("click", () => {
+        if (mesmo === valor) return;
+        mudar((x) => definir(x, "datas.mesmo_local", valor), { rotulo: "local dos dias" });
+        redesenhar();
+      });
+      return b;
+    };
+    const cLocais = cartao("Locais", mesmo ? "Os dois dias no mesmo lugar." : "Onde acontece cada dia.",
+      dias.length > 1 ? h("div", { class: "ev-grupo" },
+        h("div", { class: "fichas", role: "group", "aria-label": "Onde acontecem os dias" },
+          escolhaLocal(false, "Um local em cada dia"), escolhaLocal(true, "O mesmo local nos dois dias")),
+        mesmo ? h("p", { class: "ev-campo__ajuda", text: "O mapa mostra um ponto só e a seção do voo até o resort sai da página." }) : null) : null,
+      ...(mesmo ? dias.slice(0, 1) : dias).map((dia, i) => h("div", { class: "ev-grupo" },
+        h("h3", { class: "ev-grupo__titulo", text: mesmo ? "Os dois dias" : `Dia ${i + 1}` }),
         texto(`datas.dias.${i}.local`, { rotulo: "Nome do local" }),
         texto(`datas.dias.${i}.endereco`, { rotulo: "Endereço" }),
         h("div", { class: "ev-linha" },
@@ -372,7 +387,7 @@ export function criarAbaEvento(ctx) {
           texto(`datas.dias.${i}.uf`, { rotulo: "Estado", larg: "mini" })),
         texto(`datas.dias.${i}.cidade`, { rotulo: "Cidade, em uma palavra", ajuda: "Aparece na programação e na tabela dos aeroportos." }),
         linkDoMapa(i))),
-      obter(d, "datas.deslocamento") !== undefined ? texto("datas.deslocamento", { rotulo: "Trajeto entre os dias", ajuda: "Ex.: cerca de 1h30 de carro · 90 km" }) : null,
+      !mesmo && obter(d, "datas.deslocamento") !== undefined ? texto("datas.deslocamento", { rotulo: "Trajeto entre os dias", ajuda: "Ex.: cerca de 1h30 de carro · 90 km" }) : null,
       obter(d, "datas.local_curto") !== undefined ? texto("datas.local_curto", { rotulo: "Cidade ao lado da data", ajuda: "Ex.: Alphaville/SP" }) : null);
 
     const qtd = obter(d, "palestrantes.convidados.quantidade");

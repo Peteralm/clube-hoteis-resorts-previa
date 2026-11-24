@@ -167,7 +167,7 @@
         </header>
 
         <div class="oque__grade">
-{%- for c, alvo, largura in [["aprender", "#mentores", [[1600], 1600]], ["negociar", "#mesa", [[1600], 1600]], ["resort", "#voo", [[800, 1600], 1600]]] %}
+{%- for c, alvo, largura in [["aprender", "#mentores", [[1600], 1600]], ["negociar", "#mesa", [[1600], 1600]], ["resort", "#programa" if mesmo_local else "#voo", [[800, 1600], 1600]]] %}
           <article class="oque__celula oque__celula--{{ c }}">
             {{ quadro(c, alvo, largura) }}
             <p class="oque__fonte"{{ campo("textos.oque." ~ c ~ ".fonte") }}>{{ t.oque[c].fonte }}</p>
@@ -357,6 +357,8 @@
     </section>
 
     <!-- ============================================================ o voo: do vale do hero até a piscina do Dia 2 -->
+{#- sai da página quando os dois dias são no mesmo local (datas.mesmo_local) #}
+{%- if not mesmo_local %}
     <section class="voo" id="voo" aria-labelledby="voo-titulo">
       <div class="voo__palco">
         <div class="voo__quadro">
@@ -373,6 +375,7 @@
         </div>
       </div>
     </section>
+{%- endif %}
 
     <!-- ============================================================ edição anterior -->
     <section class="secao edicao" aria-labelledby="edicao-titulo">
@@ -491,17 +494,19 @@
              (A e B, como no mapa; clicar no nome volta o mapa ao trajeto) e abre a rota no Google Maps ou no Waze -->
         <div class="mapa">
           <div class="mapa__tela">
-            <iframe class="mapa__iframe" title="Mapa com o trajeto de carro {{ dias[0].de }}, em {{ dias[0].cidade }}, {{ (dias | last).para }}, em {{ (dias | last).cidade }}" src="{{ mapa_iframe }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+            <iframe class="mapa__iframe" title="{% if mesmo_local %}Mapa {{ dias[0].de }}, em {{ dias[0].cidade }}{% else %}Mapa com o trajeto de carro {{ dias[0].de }}, em {{ dias[0].cidade }}, {{ (dias | last).para }}, em {{ (dias | last).cidade }}{% endif %}" src="{{ mapa_iframe }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
           </div>
 
           <ol class="mapa__paradas">
-{%- for x in dias %}
+{%- for x in (dias.slice(0, 1) if mesmo_local else dias) %}
 {%- if not loop.first %}
             <li class="mapa__entre"><span{{ campo("datas.deslocamento") }}>{{ d.datas.deslocamento }}</span></li>
 {%- endif %}
             <li class="mapa__parada"{{ painel("datas.dias." ~ loop.index0) }}>
-              <button type="button" class="mapa__nome" title="Mostrar o trajeto no mapa"><span class="mapa__letra" aria-hidden="true">{{ x.letra }}</span><span class="mapa__nome-texto"{{ campo("datas.dias." ~ loop.index0 ~ ".local") }}>{{ x.local }}</span>{{ pino }}</button>
-              <p class="mapa__quando"><span>Dia {{ x.n }}</span> <time datetime="{{ x.iso }}T{{ x.chegada }}">{{ x.mapa_quando }}</time></p>
+              <button type="button" class="mapa__nome" title="Mostrar {{ 'o local' if mesmo_local else 'o trajeto' }} no mapa"><span class="mapa__letra" aria-hidden="true">{{ x.letra }}</span><span class="mapa__nome-texto"{{ campo("datas.dias." ~ loop.index0 ~ ".local") }}>{{ x.local }}</span>{{ pino }}</button>
+{%- for q in (dias if mesmo_local else [x]) %}
+              <p class="mapa__quando"><span>Dia {{ q.n }}</span> <time datetime="{{ q.iso }}T{{ q.chegada }}">{{ q.mapa_quando }}</time></p>
+{%- endfor %}
               <p class="mapa__endereco">{{ x.endereco }}<br>{{ x.localidade }}, {{ x.uf }}</p>
               <p class="mapa__acoes">
                 <span class="mapa__rotulo">Rota até lá</span>
@@ -520,11 +525,11 @@
           </div>
           <table class="voos-tabela">
             <thead>
-              <tr><th scope="col">Aeroporto</th>{% for x in dias %}<th scope="col">até {{ x.cidade }} <small>Dia {{ x.n }}</small></th>{% endfor %}</tr>
+              <tr><th scope="col">Aeroporto</th>{% if mesmo_local %}<th scope="col">até {{ dias[0].cidade }} <small>Dias {% for x in dias %}{{ x.n }}{% if not loop.last %}{{ " e " if loop.revindex == 2 else ", " }}{% endif %}{% endfor %}</small></th>{% else %}{% for x in dias %}<th scope="col">até {{ x.cidade }} <small>Dia {{ x.n }}</small></th>{% endfor %}{% endif %}</tr>
             </thead>
             <tbody{{ lista("datas.aeroportos") }}>
 {%- for a in d.datas.aeroportos %}
-              <tr{{ item(loop.index0) }}{{ painel("datas.aeroportos." ~ loop.index0) }}><th scope="row">{{ frag("datas.aeroportos." ~ loop.index0 ~ ".nome", a.nome) }} <small{{ campo("datas.aeroportos." ~ loop.index0 ~ ".sigla") }}>{{ a.sigla }}</small></th>{% for m in a.minutos %}<td style="--min:{{ m }}"><span>{{ minutos_br(m) }}</span><i></i></td>{% endfor %}</tr>
+              <tr{{ item(loop.index0) }}{{ painel("datas.aeroportos." ~ loop.index0) }}><th scope="row">{{ frag("datas.aeroportos." ~ loop.index0 ~ ".nome", a.nome) }} <small{{ campo("datas.aeroportos." ~ loop.index0 ~ ".sigla") }}>{{ a.sigla }}</small></th>{% for m in (a.minutos.slice(0, 1) if mesmo_local else a.minutos) %}<td style="--min:{{ m }}"><span>{{ minutos_br(m) }}</span><i></i></td>{% endfor %}</tr>
 {%- endfor %}
             </tbody>
           </table>

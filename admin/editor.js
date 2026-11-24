@@ -9,7 +9,7 @@ import { criarLugares } from "./lugares.js";
 import { criarAbaEvento } from "./evento.js";
 import { TIPOS_IMAGEM, LIMITE_MB, enviarFoto } from "./midia.js";
 
-const ESCONDER = /^(\$schema|versao)$/;
+const ESCONDER = /^(\$schema|versao|mesmo_local)$/; // mesmo_local: a chave fica na aba Evento
 const ehImagem = (v) => !!v && typeof v === "object" && !Array.isArray(v) && typeof v.src === "string";
 const ehPlanta = (c) => /(^|\.)planta(\.|$)/.test(c);
 const SALVAR_APOS = 1200;
